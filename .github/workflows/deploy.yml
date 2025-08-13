@@ -1,0 +1,42 @@
+name: 🚀 Deploy Frontend to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Sync frontend code (excluding node_modules)
+        run: |
+          rsync -avz --exclude 'node_modules' -e "ssh -o StrictHostKeyChecking=no" ./fastprint-frontend/ ubuntu@${{ secrets.EC2_HOST }}:~/frontend/FastPrint-Frontend/fastprint-frontend/
+
+      - name: Build and run Docker container on EC2 with Node 20
+        run: |
+          ssh ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
+            cd ~/frontend/FastPrint-Frontend/fastprint-frontend
+            docker stop fastprint-frontend || true
+            docker rm fastprint-frontend || true
+
+            # Update Dockerfile to use Node 20
+            sed -i 's|FROM node:18|FROM node:20|g' Dockerfile
+
+            docker build --no-cache -t fastprint-frontend .
+            docker run -d --name fastprint-frontend -p 4173:4173 fastprint-frontend
+
+            echo "Deployment successful!"
+          EOF
