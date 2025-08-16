@@ -8,6 +8,7 @@ import Shop from './pages/Shop'
 import CoverExpert from './pages/CoverExpert';
 import Payment from './pages/Payment';
 import Products from './pages/Products';
+import Services from './pages/Services';
 // Products
 import PrintBook from './pages/products/PrintBook';
 import ComicBook from './pages/products/ComicBook';
@@ -138,6 +139,7 @@ const AppRoutes = () => {
       <Route path="/resources/order-lookup" element={<OrderLookup />} />
       <Route path="/resources/plan-project" element={<PlanProject />} />
       <Route path="/book-pricing" element={<BookPricing />} />
+      <Route path="/services" element={<Services />} />
 
       {/* Auth & Verification Routes */}
       <Route path="/reset-password" element={<ResetPassword />} />
