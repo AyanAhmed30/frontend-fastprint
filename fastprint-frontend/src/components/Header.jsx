@@ -9,7 +9,6 @@ import useAuth from '../hooks/useAuth';
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [productOpen, setProductOpen] = useState(false);
   const [resourceOpen, setResourceOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
@@ -85,11 +84,12 @@ const Header = () => {
         <div className="flex justify-between items-center py-3">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
-            <img 
-              src={FastPrintLogo} 
-              alt="Fast Print Guys Logo" 
-              className="w-10 h-10 sm:w-12 sm:h-12 transition-transform duration-200 hover:scale-105" 
-            />
+          <img 
+  src={FastPrintLogo} 
+  alt="Fast Print Guys Logo" 
+  className="w-16 h-16 sm:w-20 sm:h-55 transition-transform duration-200 hover:scale-105" 
+/>
+
           </Link>
 
           {/* Desktop Menu */}
@@ -112,45 +112,12 @@ const Header = () => {
             <Link to="/portfolio" className="hover:text-blue-600 transition-colors duration-200">
               Portfolio
             </Link>
+            <Link to="/services" className="hover:text-blue-600 transition-colors duration-200">
+              Services
+            </Link>
 
             {/* Resources Dropdown */}
-            <div
-              className="relative"
-              ref={resourceRef}
-              onMouseEnter={() => setResourceOpen(true)}
-              onMouseLeave={() => setResourceOpen(false)}
-            >
-              <button className="hover:text-blue-600 flex items-center gap-1 transition-colors duration-200">
-                Resources <IoIosArrowDown className={`transition-transform duration-200 ${resourceOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {resourceOpen && (
-                <div className="absolute left-0 mt-2 bg-white shadow-lg rounded-lg z-20 min-w-52 border border-gray-100">
-                  <div className="py-2">
-                    <Link to="/resources/guidetemplates" className="block px-4 py-2 hover:bg-gray-50 transition-colors duration-200 text-sm">
-                      Guide & Templates
-                    </Link>
-                    <Link to="/resources/blogs" className="block px-4 py-2 hover:bg-gray-50 transition-colors duration-200 text-sm">
-                      Blogs
-                    </Link>
-                    <Link to="/resources/publishing" className="block px-4 py-2 hover:bg-gray-50 transition-colors duration-200 text-sm">
-                      Publishing Resources
-                    </Link>
-                    <Link to="/resources/contactresources" className="block px-4 py-2 hover:bg-gray-50 transition-colors duration-200 text-sm">
-                      Contact Resources
-                    </Link>
-                    <Link to="/resources/hireprofessional" className="block px-4 py-2 hover:bg-gray-50 transition-colors duration-200 text-sm">
-                      Hire Professional
-                    </Link>
-                    <Link to="/resources/orderlookup" className="block px-4 py-2 hover:bg-gray-50 transition-colors duration-200 text-sm">
-                      Order Lookup
-                    </Link>
-                    <Link to="/resources/planproject" className="block px-4 py-2 hover:bg-gray-50 transition-colors duration-200 text-sm">
-                      Plan Project
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
+            
           </nav>
 
           {/* Desktop Action Buttons */}
@@ -299,69 +266,7 @@ const Header = () => {
               </Link>
 
               {/* Mobile Resources Section */}
-              <div className="border-t border-gray-100 mt-2 pt-2">
-                <button
-                  onClick={() => setResourceOpen(!resourceOpen)}
-                  className="flex items-center justify-between w-full px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md"
-                >
-                  <span>Resources</span>
-                  <IoIosArrowDown className={`transition-transform duration-200 ${resourceOpen ? 'rotate-180' : ''}`} />
-                </button>
-                
-                <div className={`transition-all duration-300 ease-in-out ${resourceOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-                  <div className="pl-4 space-y-1">
-                    <Link 
-                      to="/resources/guidetemplates" 
-                      className="block px-4 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md"
-                      onClick={handleMobileLinkClick}
-                    >
-                      Guide & Templates
-                    </Link>
-                    <Link 
-                      to="/resources/blogs" 
-                      className="block px-4 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md"
-                      onClick={handleMobileLinkClick}
-                    >
-                      Blogs
-                    </Link>
-                    <Link 
-                      to="/resources/publishing" 
-                      className="block px-4 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md"
-                      onClick={handleMobileLinkClick}
-                    >
-                      Publishing Resources
-                    </Link>
-                    <Link 
-                      to="/resources/contactresources" 
-                      className="block px-4 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md"
-                      onClick={handleMobileLinkClick}
-                    >
-                      Contact Resources
-                    </Link>
-                    <Link 
-                      to="/resources/hireprofessional" 
-                      className="block px-4 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md"
-                      onClick={handleMobileLinkClick}
-                    >
-                      Hire Professional
-                    </Link>
-                    <Link 
-                      to="/resources/orderlookup" 
-                      className="block px-4 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md"
-                      onClick={handleMobileLinkClick}
-                    >
-                      Order Lookup
-                    </Link>
-                    <Link 
-                      to="/resources/planproject" 
-                      className="block px-4 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-200 rounded-md"
-                      onClick={handleMobileLinkClick}
-                    >
-                      Plan Project
-                    </Link>
-                  </div>
-                </div>
-              </div>
+             
 
               {/* Mobile Auth Button */}
               <div className="border-t border-gray-100 mt-4 pt-4 px-4">

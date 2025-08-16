@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
+import { useNavigate } from "react-router-dom";
 import portfolioImg from "../assets/images/img75.png"
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 
 const Portfolio = () => {
+  const navigate = useNavigate()
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedImage, setSelectedImage] = useState(null)
 
@@ -227,303 +229,684 @@ const Portfolio = () => {
     <Header/>
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-     <section
-        className="relative w-full py-16"
-        style={{
-          background: "#101D2E",
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-8">
-          
-          {/* Left Text */}
-          <div className="md:w-1/2 text-left">
-            <h2 className="text-4xl font-bold mb-4">
-              <span className="text-yellow-400">Our </span>
-              <span className="text-white">Portfolio</span>
-            </h2>
-            <p className="text-gray-300 text-lg leading-relaxed">
-         At Fast Print Guys, our portfolio highlights vibrant, high-quality prints — from banners to custom products — all designed to leave a lasting impression.
 
-            </p>
-          </div>
+  <section className="relative w-full py-24 bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#334155] overflow-hidden">
+  {/* Animated Background Elements */}
+  <div className="absolute inset-0">
+    <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+    <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+    <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-orange-500/10 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
+  </div>
 
-          {/* Right Image */}
-          <div className="md:w-1/2 flex justify-center items-center">
-            <img
-              src={portfolioImg}
-              alt="Our Portfolio"
-              className="w-full max-w-md rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 cursor-pointer"
-            />
-          </div>
+  {/* Grid Pattern */}
+  <div
+    className="absolute inset-0 opacity-20"
+    style={{
+      backgroundImage: `
+        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+      `,
+      backgroundSize: "50px 50px"
+    }}
+  ></div>
 
-        </div>
-      </section>
+  <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col lg:flex-row items-center gap-16 relative z-10">
+    {/* Left Content */}
+    <div className="flex-1 text-white space-y-8">
+      <div className="scroll-animate slide-in-left">
+        <span className="inline-block px-4 py-2 bg-orange-500/20 text-orange-300 rounded-full text-sm font-medium mb-4">
+          Our Creative Work
+        </span>
+        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+          Explore the Portfolio of{' '}
+          <span>
+            Fast Print Guys
+          </span>
+        </h1>
+        <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
+          Discover our wide range of successful projects and creative printed materials. Each project showcases our commitment to quality and innovation.
+        </p>
+      </div>
+      
+      <div className="scroll-animate slide-in-left stagger-2 flex flex-wrap gap-4">
+        <button className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full transition-all duration-300 hover-lift pulse-hover" onClick={() => navigate('/services')}>
+          Explore Services
+        </button>
+      
+      </div>
+    </div>
+
+    {/* Right Image */}
+    <div className="flex-1 scroll-animate slide-in-right">
+      <div className="relative">
+        <div className="absolute -inset-4 bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl blur opacity-30 float"></div>
+        <img
+          src={portfolioImg}  // Replace with your actual portfolio image import
+          alt="Fast Print Guys Portfolio"
+          className="relative w-full max-w-lg h-auto object-cover rounded-2xl shadow-2xl hover-lift"
+        />
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* Portfolio Gallery Section */}
-      <section className="w-full py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">
-              <span className="text-blue-600">Our </span>
-              <span className="text-gray-800">Work Gallery</span>
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-              Explore our diverse range of printing projects and see the quality that sets us apart
-            </p>
-          </div>
+<section className="w-full py-16 bg-gray-50">
+  <div className="max-w-7xl mx-auto px-6">
+    {/* Heading */}
+    <div className="text-center mb-12">
+         <h2 className="text-5xl md:text-6xl font-extrabold text-center mb-6 animate-bounceIn leading-tight">
+  <span className="text-gray-900">Our </span>
+  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
+    Work Gallery
+  </span>
+</h2>
+      <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+        Explore our diverse range of printing projects and see the quality that sets us apart
+      </p>
+    </div>
 
-          {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`px-6 py-2 rounded-full transition-all duration-300 ${
-                  selectedCategory === category.id
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-white text-gray-700 hover:bg-blue-50 border border-gray-200'
-                }`}
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
+    {/* Category Filter */}
+    <div className="flex flex-wrap justify-center gap-4 mb-12">
+      {categories.map((category) => (
+        <button
+          key={category.id}
+          onClick={() => setSelectedCategory(category.id)}
+          className={`px-6 py-2 rounded-full transition-all duration-300 ${
+            selectedCategory === category.id
+              ? "bg-blue-600 text-white shadow-lg"
+              : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
+          }`}
+        >
+          {category.name}
+        </button>
+      ))}
+    </div>
 
-          {/* Portfolio Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredItems.map((item) => (
-              <div 
-                key={item.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
-                onClick={() => setSelectedImage(item)}
+    {/* Portfolio Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      {filteredItems.map((item, index) => {
+        // You can customize gradients and icons arrays as per your theme
+        const gradients = [
+          "from-blue-500 to-blue-600",
+          "from-purple-500 to-purple-600",
+          "from-orange-500 to-orange-600",
+          "from-teal-500 to-teal-600",
+        ];
+        const bgGradients = [
+          "from-blue-50 to-blue-100",
+          "from-purple-50 to-purple-100",
+          "from-orange-50 to-orange-100",
+          "from-teal-50 to-teal-100",
+        ];
+        const icons = ["📦", "🚀", "🖨️", "✉️"];
+
+        const gradient = gradients[index % gradients.length];
+        const bgGradient = bgGradients[index % bgGradients.length];
+        const icon = icons[index % icons.length];
+
+        return (
+          <div
+            key={item.id}
+            className={`group relative bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 transition-all duration-700 hover:shadow-2xl cursor-pointer flex flex-col hover:-translate-y-3 animate-rotateIn stagger-${index + 1} backdrop-blur-sm`}
+            style={{ animationDelay: `${index * 0.15}s`, animationFillMode: "forwards" }}
+            onClick={() => setSelectedImage(item)}
+          >
+            {/* Background Gradient Overlay */}
+            <div
+              className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${bgGradient} rounded-full opacity-20 transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-700`}
+            ></div>
+
+            {/* Image Container */}
+            <div className="relative overflow-hidden rounded-t-3xl">
+              <img
+                src={item.image}
+                alt={item.title}
+                className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700"
+              />
+              {/* Image Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+              {/* Floating Icon */}
+              <div
+                className={`absolute top-4 left-4 w-12 h-12 bg-gradient-to-br ${gradient} rounded-2xl flex items-center justify-center text-white text-xl shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-500 delay-200`}
               >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-48 object-cover transition-transform duration-300 hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                    <svg className="w-8 h-8 text-white opacity-0 hover:opacity-100 transition-opacity duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2 text-gray-800">{item.title}</h3>
-                  <p className="text-gray-600 text-sm mb-3">{item.description}</p>
-                  <div className="flex justify-between items-center text-xs text-gray-500">
-                    <span>{item.size}</span>
-                    <span>{item.material}</span>
-                  </div>
+                {icon}
+              </div>
+
+              {/* Premium Badge */}
+              <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-700 transform -translate-y-24 group-hover:translate-y-0 transition-transform duration-500 delay-300">
+                Premium
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 flex flex-col flex-grow relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <h3
+                  className={`text-xl font-bold bg-gradient-to-r ${gradient} bg-clip-text text-transparent animate-zoomIn group-hover:scale-105 transition-transform duration-300`}
+                >
+                  {item.title}
+                </h3>
+                <div
+                  className={`w-8 h-8 bg-gradient-to-r ${gradient} rounded-full flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-500 delay-200`}
+                >
+                  <svg
+                    className="w-4 h-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
                 </div>
               </div>
-            ))}
+              <p className="text-gray-600 text-sm leading-relaxed flex-grow animate-fadeInUp group-hover:text-gray-700 transition-colors duration-300">
+                {item.description}
+              </p>
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                {/* Optional: Add buttons or links */}
+              </div>
+            </div>
+
+            {/* Bottom Accent Line */}
+            <div
+              className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`}
+            ></div>
+
+            {/* Hover Glow Effect */}
+            <div
+              className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
+            ></div>
           </div>
-        </div>
-      </section>
+        );
+      })}
+    </div>
+  </div>
+
+  {/* Animations and styling */}
+  <style jsx>{`
+    @keyframes rotateIn {
+      0% {
+        opacity: 0;
+        transform-origin: center;
+        transform: rotateX(-45deg) rotateY(10deg) translateY(30px);
+      }
+      100% {
+        opacity: 1;
+        transform-origin: center;
+        transform: rotateX(0deg) rotateY(0deg) translateY(0);
+      }
+    }
+    .animate-rotateIn {
+      animation-name: rotateIn;
+      animation-duration: 0.7s;
+      animation-fill-mode: forwards;
+      animation-timing-function: ease-out;
+    }
+    @keyframes zoomIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    .animate-zoomIn {
+      animation-name: zoomIn;
+      animation-duration: 0.5s;
+      animation-fill-mode: forwards;
+      animation-timing-function: ease-out;
+    }
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-fadeInUp {
+      animation-name: fadeInUp;
+      animation-duration: 0.6s;
+      animation-fill-mode: forwards;
+      animation-timing-function: ease-out;
+    }
+    /* Stagger utility classes */
+    .stagger-1 { animation-delay: 0.1s; }
+    .stagger-2 { animation-delay: 0.2s; }
+    .stagger-3 { animation-delay: 0.3s; }
+    .stagger-4 { animation-delay: 0.4s; }
+    .stagger-5 { animation-delay: 0.5s; }
+    /* Add more stagger classes if needed */
+  `}</style>
+</section>
+
+
 
       {/* Services Overview */}
-      <section className="w-full py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">
-              <span className="text-yellow-400">What We </span>
-              <span className="text-gray-800">Print</span>
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-              From small business cards to large format banners, we handle it all with precision and care
-            </p>
+<section className="w-full py-20 bg-white">
+  <div className="max-w-7xl mx-auto px-6">
+    {/* Heading */}
+    <div className="text-center mb-16">
+      <h2 className="text-5xl md:text-6xl font-extrabold text-center mb-6 animate-bounceIn leading-tight">
+  <span className="text-gray-900">What </span>
+  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
+    We Print
+  </span>
+</h2>
+
+      <p className="text-gray-600 max-w-3xl mx-auto text-lg leading-relaxed">
+        From small business cards to large format banners, we handle it all with precision and care
+      </p>
+    </div>
+
+    {/* Cards Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+      {[
+        {
+          icon: (
+            <svg className="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          ),
+          title: "Books & Binding",
+          desc: "Novels, textbooks, manuals, magazines, and professional binding services",
+          details: ["Perfect binding & saddle stitch", "Spiral & wire-o binding", "Custom cover designs"],
+          bg: "from-blue-500 to-blue-600",
+          bgGradient: "from-blue-50 to-blue-100",
+        },
+        {
+          icon: (
+            <svg className="w-8 h-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 4v10a2 2 0 002 2h8a2 2 0 002-2V8M7 8h10" />
+            </svg>
+          ),
+          title: "Banners & Signs",
+          desc: "Large format banners, outdoor signs, trade show displays, and event backdrops",
+          details: ["Weather-resistant materials", "Retractable banner stands", "Custom sizes available"],
+          bg: "from-yellow-500 to-yellow-600",
+          bgGradient: "from-yellow-50 to-yellow-100",
+        },
+        {
+          icon: (
+            <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          ),
+          title: "Flyers & Marketing",
+          desc: "Promotional flyers, postcards, menus, catalogs, and direct mail pieces",
+          details: ["High-resolution printing", "Variety of paper finishes", "Bulk order discounts"],
+          bg: "from-green-500 to-green-600",
+          bgGradient: "from-green-50 to-green-100",
+        },
+        {
+          icon: (
+            <svg className="w-8 h-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          ),
+          title: "Business Materials",
+          desc: "Business cards, letterheads, brochures, and professional stationery",
+          details: ["Premium cardstock options", "Embossing & foil stamping", "Multiple finishing options"],
+          bg: "from-purple-500 to-purple-600",
+          bgGradient: "from-purple-50 to-purple-100",
+        },
+        {
+          icon: (
+            <svg className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          ),
+          title: "Packaging & Labels",
+          desc: "Custom boxes, labels, stickers, and retail packaging solutions",
+          details: ["Eco-friendly options", "Die-cut shapes", "Food-safe materials"],
+          bg: "from-red-500 to-red-600",
+          bgGradient: "from-red-50 to-red-100",
+        },
+        {
+          icon: (
+            <svg className="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          ),
+          title: "Design Services",
+          desc: "Custom graphic design, layout services, and creative consultation",
+          details: ["Logo & brand design", "Layout & typography", "Creative consultation"],
+          bg: "from-indigo-500 to-indigo-600",
+          bgGradient: "from-indigo-50 to-indigo-100",
+        },
+      ].map(({ icon, title, desc, details, bg, bgGradient }, idx) => (
+        <div
+          key={idx}
+          className={`group relative bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 transition-all duration-700 hover:shadow-2xl cursor-pointer flex flex-col hover:-translate-y-3 animate-rotateIn stagger-${idx + 1} backdrop-blur-sm`}
+          style={{ animationDelay: `${idx * 0.15}s`, animationFillMode: "forwards" }}
+        >
+          {/* Background Gradient Overlay */}
+          <div
+            className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${bgGradient} rounded-full opacity-20 transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-700`}
+          />
+
+          {/* Icon Container */}
+          <div className={`w-20 h-20 bg-gradient-to-br ${bg} rounded-full flex items-center justify-center mx-auto mt-10 mb-6 shadow-lg transform scale-100 transition-transform duration-500 group-hover:scale-110`}>
+            {icon}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-lg border border-gray-100 hover:shadow-lg transition-shadow duration-300">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-xl mb-3">Books & Binding</h3>
-              <p className="text-gray-600 mb-4">Novels, textbooks, manuals, magazines, and professional binding services</p>
-              <ul className="text-sm text-gray-500 space-y-1">
-                <li>• Perfect binding & saddle stitch</li>
-                <li>• Spiral & wire-o binding</li>
-                <li>• Custom cover designs</li>
-              </ul>
-            </div>
-
-            <div className="text-center p-6 rounded-lg border border-gray-100 hover:shadow-lg transition-shadow duration-300">
-              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 4v10a2 2 0 002 2h8a2 2 0 002-2V8M7 8h10" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-xl mb-3">Banners & Signs</h3>
-              <p className="text-gray-600 mb-4">Large format banners, outdoor signs, trade show displays, and event backdrops</p>
-              <ul className="text-sm text-gray-500 space-y-1">
-                <li>• Weather-resistant materials</li>
-                <li>• Retractable banner stands</li>
-                <li>• Custom sizes available</li>
-              </ul>
-            </div>
-
-            <div className="text-center p-6 rounded-lg border border-gray-100 hover:shadow-lg transition-shadow duration-300">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-xl mb-3">Flyers & Marketing</h3>
-              <p className="text-gray-600 mb-4">Promotional flyers, postcards, menus, catalogs, and direct mail pieces</p>
-              <ul className="text-sm text-gray-500 space-y-1">
-                <li>• High-resolution printing</li>
-                <li>• Variety of paper finishes</li>
-                <li>• Bulk order discounts</li>
-              </ul>
-            </div>
-
-            <div className="text-center p-6 rounded-lg border border-gray-100 hover:shadow-lg transition-shadow duration-300">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-xl mb-3">Business Materials</h3>
-              <p className="text-gray-600 mb-4">Business cards, letterheads, brochures, and professional stationery</p>
-              <ul className="text-sm text-gray-500 space-y-1">
-                <li>• Premium cardstock options</li>
-                <li>• Embossing & foil stamping</li>
-                <li>• Multiple finishing options</li>
-              </ul>
-            </div>
-
-            <div className="text-center p-6 rounded-lg border border-gray-100 hover:shadow-lg transition-shadow duration-300">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-xl mb-3">Packaging & Labels</h3>
-              <p className="text-gray-600 mb-4">Custom boxes, labels, stickers, and retail packaging solutions</p>
-              <ul className="text-sm text-gray-500 space-y-1">
-                <li>• Eco-friendly options</li>
-                <li>• Die-cut shapes</li>
-                <li>• Food-safe materials</li>
-              </ul>
-            </div>
-
-            <div className="text-center p-6 rounded-lg border border-gray-100 hover:shadow-lg transition-shadow duration-300">
-              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-xl mb-3">Design Services</h3>
-              <p className="text-gray-600 mb-4">Custom graphic design, layout services, and creative consultation</p>
-              <ul className="text-sm text-gray-500 space-y-1">
-                <li>• Logo & brand design</li>
-                <li>• Layout & typography</li>
-                <li>• Creative consultation</li>
-              </ul>
-            </div>
+          {/* Content */}
+          <div className="px-8 pb-8 flex flex-col flex-grow relative z-10 text-center">
+            <h3 className={`text-2xl font-bold mb-4 bg-gradient-to-r ${bg} bg-clip-text text-transparent animate-zoomIn transition-transform duration-300 group-hover:scale-110`}>
+              {title}
+            </h3>
+            <p className="text-gray-600 mb-6">{desc}</p>
+            <ul className="text-sm text-gray-500 space-y-2">
+              {details.map((detail, i) => (
+                <li key={i} className="flex items-start gap-2 before:content-['•'] before:text-yellow-400 before:text-xl before:-translate-y-0.5 before:mr-1">
+                  {detail}
+                </li>
+              ))}
+            </ul>
           </div>
+
+          {/* Bottom Accent Line */}
+          <div
+            className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${bg} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`}
+          />
+
+          {/* Hover Glow */}
+          <div
+            className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${bg} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
+          />
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+
+  {/* Animations */}
+  <style jsx>{`
+    @keyframes rotateIn {
+      0% {
+        opacity: 0;
+        transform-origin: center;
+        transform: rotateX(-45deg) rotateY(10deg) translateY(30px);
+      }
+      100% {
+        opacity: 1;
+        transform-origin: center;
+        transform: rotateX(0deg) rotateY(0deg) translateY(0);
+      }
+    }
+    .animate-rotateIn {
+      animation-name: rotateIn;
+      animation-duration: 0.7s;
+      animation-fill-mode: forwards;
+      animation-timing-function: ease-out;
+    }
+    @keyframes zoomIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    .animate-zoomIn {
+      animation-name: zoomIn;
+      animation-duration: 0.5s;
+      animation-fill-mode: forwards;
+      animation-timing-function: ease-out;
+    }
+    .stagger-1 {
+      animation-delay: 0.1s;
+    }
+    .stagger-2 {
+      animation-delay: 0.2s;
+    }
+    .stagger-3 {
+      animation-delay: 0.3s;
+    }
+    .stagger-4 {
+      animation-delay: 0.4s;
+    }
+    .stagger-5 {
+      animation-delay: 0.5s;
+    }
+    .stagger-6 {
+      animation-delay: 0.6s;
+    }
+  `}</style>
+</section>
+
+
+
 
       {/* Client Testimonials */}
-      <section className="w-full py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">
-              <span className="text-blue-600">Client </span>
-              <span className="text-gray-800">Success Stories</span>
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-              Don't just take our word for it - hear what our satisfied customers have to say
-            </p>
-          </div>
+     <section className="w-full py-20 bg-gray-50">
+  <div className="max-w-7xl mx-auto px-6">
+    {/* Heading */}
+    <div className="text-center mb-16 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+        <h2 className="text-5xl md:text-6xl font-extrabold text-center mb-6 animate-bounceIn leading-tight">
+  <span className="text-gray-900">Our </span>
+  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
+    Success Stories
+  </span>
+</h2>
+      <p className="text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
+        Don't just take our word for it - hear what our satisfied customers have to say
+      </p>
+    </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md p-8 hover:shadow-lg transition-shadow duration-300">
-                <div className="flex items-center mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-6 italic">"{testimonial.text}"</p>
-                <div className="border-t pt-4">
-                  <p className="font-semibold text-gray-800">{testimonial.name}</p>
-                  <p className="text-sm text-gray-500">{testimonial.company}</p>
-                </div>
-              </div>
+    {/* Testimonials Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      {testimonials.map((testimonial, index) => (
+        <div
+          key={index}
+          className={`group relative bg-white rounded-3xl shadow-lg p-8 transition-shadow duration-500 transform cursor-pointer hover:shadow-2xl hover:-translate-y-2 animate-rotateIn stagger-${index + 1} backdrop-blur-sm`}
+          style={{ animationDelay: `${index * 0.15}s`, animationFillMode: 'forwards' }}
+        >
+          <div className="flex items-center mb-6 justify-center space-x-1">
+            {[...Array(5)].map((_, i) => (
+              <svg
+                key={i}
+                className="w-6 h-6 text-yellow-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+              >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
             ))}
           </div>
+          <p className="text-gray-600 mb-8 italic text-center leading-relaxed">"{testimonial.text}"</p>
+          <div className="border-t border-gray-100 pt-6 text-center">
+            <p className="font-semibold text-gray-800 text-lg">{testimonial.name}</p>
+            <p className="text-sm text-gray-500">{testimonial.company}</p>
+          </div>
+
+          {/* Bottom Accent Line */}
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 rounded-b-3xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+
+          {/* Hover Glow Effect */}
+          <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 opacity-0 group-hover:opacity-5 transition-opacity duration-500 pointer-events-none"></div>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+
+  {/* Animations CSS */}
+  <style jsx>{`
+    @keyframes rotateIn {
+      0% {
+        opacity: 0;
+        transform-origin: center;
+        transform: rotateX(-45deg) rotateY(10deg) translateY(30px);
+      }
+      100% {
+        opacity: 1;
+        transform-origin: center;
+        transform: rotateX(0deg) rotateY(0deg) translateY(0);
+      }
+    }
+    .animate-rotateIn {
+      animation-name: rotateIn;
+      animation-duration: 0.7s;
+      animation-fill-mode: forwards;
+      animation-timing-function: ease-out;
+    }
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-fadeInUp {
+      animation-name: fadeInUp;
+      animation-duration: 0.6s;
+      animation-fill-mode: forwards;
+      animation-timing-function: ease-out;
+    }
+    /* Stagger utility for delays */
+    .stagger-1 {
+      animation-delay: 0.1s;
+    }
+    .stagger-2 {
+      animation-delay: 0.2s;
+    }
+    .stagger-3 {
+      animation-delay: 0.3s;
+    }
+    /* Extend stagger classes if you have more testimonials */
+  `}</style>
+</section>
+
 
       {/* Why Choose Us Section */}
-      <section
-        className="w-full py-24"
-        style={{
-          background: "linear-gradient(135deg, rgba(173, 216, 230, 0.3), rgba(255, 182, 193, 0.3))",
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center mb-6">
-            <span className="text-blue-400">Why </span>
-            <span className="text-black">Choose Us</span>
-          </h2>
-          <p className="text-center text-gray-600 max-w-2xl mx-auto mb-16 text-lg">
-            At Fast Print Guys, we go beyond printing — delivering top-tier quality, speed, and personalized service that makes your ideas stand out.
-          </p>
+   <section
+  className="w-full py-24"
+  style={{
+    background: "linear-gradient(135deg, rgba(173, 216, 230, 0.3), rgba(255, 182, 193, 0.3))",
+  }}
+>
+  <div className="max-w-7xl mx-auto px-6">
+        <h2 className="text-5xl md:text-6xl font-extrabold text-center mb-6 animate-bounceIn leading-tight">
+  <span className="text-gray-900">Why </span>
+  <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent">
+    Choose Us
+  </span>
+</h2>
+    <p className="text-center text-gray-600 max-w-2xl mx-auto mb-16 text-lg animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+      At Fast Print Guys, we go beyond printing — delivering top-tier quality, speed, and personalized service that makes your ideas stand out.
+    </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
-            <div className="bg-white shadow-md rounded-lg p-8 flex flex-col items-center text-center hover:shadow-xl transition-shadow duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-              </svg>
-              <h3 className="font-semibold text-xl mt-5 mb-3">Exceptional Quality</h3>
-              <p className="text-gray-600 text-base">
-                We use premium materials and advanced printing technology for stunning results every time.
-              </p>
-            </div>
-
-            <div className="bg-white shadow-md rounded-lg p-8 flex flex-col items-center text-center hover:shadow-xl transition-shadow duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <h3 className="font-semibold text-xl mt-5 mb-3">Fast Turnaround</h3>
-              <p className="text-gray-600 text-base">
-                Quick processing without compromising quality — get your prints right when you need them.
-              </p>
-            </div>
-
-            <div className="bg-white shadow-md rounded-lg p-8 flex flex-col items-center text-center hover:shadow-xl transition-shadow duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <h3 className="font-semibold text-xl mt-5 mb-3">Nationwide Delivery</h3>
-              <p className="text-gray-600 text-base">
-                We ship across the country, ensuring your prints reach you safely and on time.
-              </p>
-            </div>
-
-            <div className="bg-white shadow-md rounded-lg p-8 flex flex-col items-center text-center hover:shadow-xl transition-shadow duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <h3 className="font-semibold text-xl mt-5 mb-3">Custom Solutions</h3>
-              <p className="text-gray-600 text-base">
-                From design to finishing, we tailor every order to match your exact needs.
-              </p>
-            </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+      {[
+        {
+          iconPath: "M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z",
+          title: "Exceptional Quality",
+          desc: "We use premium materials and advanced printing technology for stunning results every time.",
+          colorFrom: "from-yellow-400",
+          colorTo: "to-yellow-500",
+          bgGradient: "from-yellow-100 to-yellow-200",
+        },
+        {
+          iconPath: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+          title: "Fast Turnaround",
+          desc: "Quick processing without compromising quality — get your prints right when you need them.",
+          colorFrom: "from-yellow-400",
+          colorTo: "to-yellow-600",
+          bgGradient: "from-yellow-50 to-yellow-100",
+        },
+        {
+          iconPath: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+          title: "Nationwide Delivery",
+          desc: "We ship across the country, ensuring your prints reach you safely and on time.",
+          colorFrom: "from-yellow-400",
+          colorTo: "to-yellow-500",
+          bgGradient: "from-yellow-50 to-yellow-100",
+        },
+        {
+          iconPath1: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z",
+          iconPath2: "M15 12a3 3 0 11-6 0 3 3 0 016 0z",
+          title: "Custom Solutions",
+          desc: "From design to finishing, we tailor every order to match your exact needs.",
+          colorFrom: "from-yellow-400",
+          colorTo: "to-yellow-600",
+          bgGradient: "from-yellow-50 to-yellow-100"
+        },
+      ].map(({ iconPath, iconPath1, iconPath2, title, desc, colorFrom, colorTo, bgGradient }, idx) => (
+        <div
+          key={idx}
+          className={`group relative bg-white rounded-3xl shadow-lg p-8 flex flex-col items-center text-center transition-shadow duration-500 hover:shadow-2xl hover:-translate-y-3 animate-rotateIn stagger-${idx + 1} backdrop-blur-sm`}
+          style={{ animationDelay: `${idx * 0.15}s`, animationFillMode: "forwards" }}
+        >
+          <div
+            className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-gradient-to-br ${bgGradient} transition-transform duration-500 group-hover:scale-110 shadow-lg`}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className={`w-16 h-16 text-yellow-400`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              {/* Support icons with one or two paths */}
+              {iconPath && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={iconPath} />}
+              {iconPath1 && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={iconPath1} />}
+              {iconPath2 && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={iconPath2} />}
+            </svg>
           </div>
+          <h3 className="text-2xl font-bold mb-4 text-gray-800">{title}</h3>
+          <p className="text-gray-600 max-w-xs">{desc}</p>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+
+  {/* Animations */}
+  <style jsx>{`
+    @keyframes rotateIn {
+      0% {
+        opacity: 0;
+        transform-origin: center;
+        transform: rotateX(-45deg) rotateY(10deg) translateY(30px);
+      }
+      100% {
+        opacity: 1;
+        transform-origin: center;
+        transform: rotateX(0deg) rotateY(0deg) translateY(0);
+      }
+    }
+    .animate-rotateIn {
+      animation-name: rotateIn;
+      animation-duration: 0.7s;
+      animation-fill-mode: forwards;
+      animation-timing-function: ease-out;
+    }
+    /* Stagger utility for delays */
+    .stagger-1 {
+      animation-delay: 0.1s;
+    }
+    .stagger-2 {
+      animation-delay: 0.2s;
+    }
+    .stagger-3 {
+      animation-delay: 0.3s;
+    }
+    .stagger-4 {
+      animation-delay: 0.4s;
+    }
+  `}</style>
+</section>
+
 
       {/* Image Modal */}
       {selectedImage && (
