@@ -6,7 +6,6 @@ import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import { BASE_URL } from "../services/baseURL"; // Import centralized base URL
 
-
 const CoverExpert = () => {
   const navigate = useNavigate();
   const { token } = useContext(AuthContext);
@@ -162,40 +161,40 @@ const CoverExpert = () => {
       <Header />
 
       {/* Navigation Tabs */}
-      <div className="w-full h-[51px] flex items-center justify-center gap-8 px-6 bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] font-sans">
+      <div className="w-full h-auto md:h-[51px] flex flex-col md:flex-row items-center justify-center gap-2 md:gap-8 px-4 md:px-6 py-2 md:py-0 bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] font-sans">
         <span
           onClick={() => navigate("/start-project")}
-          className="text-white text-lg font-semibold cursor-pointer pb-1 border-b-4 border-transparent hover:border-yellow-400 transition-all"
+          className="text-white text-base md:text-lg font-semibold cursor-pointer pb-1 border-b-2 md:border-b-4 border-transparent hover:border-yellow-400 transition-all text-center w-full md:w-auto"
         >
           Start Project
         </span>
         <span
           onClick={() => navigate("/design-project")}
-          className="text-white text-lg font-semibold cursor-pointer pb-1 border-b-4 border-transparent hover:border-yellow-400 transition-all"
+          className="text-white text-base md:text-lg font-semibold cursor-pointer pb-1 border-b-2 md:border-b-4 border-transparent hover:border-yellow-400 transition-all text-center w-full md:w-auto"
         >
           Designs
         </span>
-        <span className="text-white text-lg font-semibold cursor-pointer pb-1 border-b-4 border-yellow-400">
+        <span className="text-white text-base md:text-lg font-semibold cursor-pointer pb-1 border-b-2 md:border-b-4 border-yellow-400 text-center w-full md:w-auto">
           Cover Expert
         </span>
       </div>
 
       {/* Main Content */}
-      <div className="w-full min-h-screen px-6 py-10 bg-gradient-to-br from-[#eef4ff] to-[#fef6fb] font-sans">
-        <div className="max-w-[909px] mx-auto p-12 rounded-2xl shadow-xl bg-gradient-to-r from-[#ffe4ec] via-[#fdfdfd] to-[#e0f3ff]">
+      <div className="w-full min-h-screen px-4 md:px-6 py-6 md:py-10 bg-gradient-to-br from-[#eef4ff] to-[#fef6fb] font-sans">
+        <div className="max-w-[909px] mx-auto p-4 md:p-8 lg:p-12 rounded-xl md:rounded-2xl shadow-lg md:shadow-xl bg-gradient-to-r from-[#ffe4ec] via-[#fdfdfd] to-[#e0f3ff]">
           {/* Header */}
-          <div className="relative flex justify-center items-center mb-10">
-            <div className="absolute left-0 right-0 h-[4px] bg-gradient-to-r from-[#D15D9E] to-[#5D4495] z-0" />
-            <div className="h-[47px] w-[440px] flex items-center justify-center text-white font-medium text-md z-10 bg-gradient-to-r from-[#D15D9E] to-[#5D4495] rounded-full">
+          <div className="relative flex justify-center items-center mb-6 md:mb-10">
+            <div className="absolute left-0 right-0 h-[2px] md:h-[4px] bg-gradient-to-r from-[#D15D9E] to-[#5D4495] z-0" />
+            <div className="h-[40px] md:h-[47px] w-full md:w-[440px] flex items-center justify-center text-white font-medium text-sm md:text-md z-10 bg-gradient-to-r from-[#D15D9E] to-[#5D4495] rounded-full">
               Contact Cover Design Expert
             </div>
           </div>
 
           {/* Project Summary */}
           {projectData && designForm && (
-            <div className="mb-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
-              <h3 className="text-[#2A428C] text-lg font-semibold mb-3">Project Summary</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div className="mb-6 md:mb-8 p-4 md:p-6 bg-blue-50 rounded-lg md:rounded-xl border border-blue-200">
+              <h3 className="text-[#2A428C] text-base md:text-lg font-semibold mb-2 md:mb-3">Project Summary</h3>
+              <div className="grid grid-cols-1 gap-2 md:gap-4 text-xs md:text-sm">
                 <div><strong>Title:</strong> {projectData.projectTitle}</div>
                 <div><strong>Category:</strong> {projectData.category}</div>
                 <div><strong>Language:</strong> {projectData.language || 'Not specified'}</div>
@@ -206,97 +205,97 @@ const CoverExpert = () => {
 
           {/* General Error Message */}
           {errors.general && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">
+            <div className="mb-4 md:mb-6 p-3 md:p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center text-sm md:text-base">
               {errors.general}
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-[700px] mx-auto bg-white p-8 rounded-2xl shadow-md">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-6 max-w-full md:max-w-[700px] mx-auto bg-white p-4 md:p-6 lg:p-8 rounded-xl md:rounded-2xl shadow-sm md:shadow-md">
             <div>
-              <label className="text-black font-semibold block mb-1">Your Name *</label>
+              <label className="text-black font-semibold block mb-1 text-sm md:text-base">Your Name *</label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className={`w-full border rounded-md p-3 text-sm ${errors.name ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                className={`w-full border rounded-md p-2 md:p-3 text-xs md:text-sm ${errors.name ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                 placeholder="Enter your full name"
               />
-              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+              {errors.name && <p className="text-red-500 text-xs md:text-sm mt-1">{errors.name}</p>}
             </div>
 
             <div>
-              <label className="text-black font-semibold block mb-1">Your Email *</label>
+              <label className="text-black font-semibold block mb-1 text-sm md:text-base">Your Email *</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className={`w-full border rounded-md p-3 text-sm ${errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                className={`w-full border rounded-md p-2 md:p-3 text-xs md:text-sm ${errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                 placeholder="Enter your email address"
               />
-              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+              {errors.email && <p className="text-red-500 text-xs md:text-sm mt-1">{errors.email}</p>}
             </div>
 
             <div>
-              <label className="text-black font-semibold block mb-1">Book Title *</label>
+              <label className="text-black font-semibold block mb-1 text-sm md:text-base">Book Title *</label>
               <input
                 type="text"
                 name="bookTitle"
                 value={formData.bookTitle}
                 onChange={handleChange}
                 required
-                className={`w-full border rounded-md p-3 text-sm ${errors.bookTitle ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                className={`w-full border rounded-md p-2 md:p-3 text-xs md:text-sm ${errors.bookTitle ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                 placeholder="Enter your book title"
               />
-              {errors.bookTitle && <p className="text-red-500 text-sm mt-1">{errors.bookTitle}</p>}
+              {errors.bookTitle && <p className="text-red-500 text-xs md:text-sm mt-1">{errors.bookTitle}</p>}
             </div>
 
             <div>
-              <label className="text-black font-semibold block mb-1">Book Genre *</label>
+              <label className="text-black font-semibold block mb-1 text-sm md:text-base">Book Genre *</label>
               <input
                 type="text"
                 name="bookGenre"
                 value={formData.bookGenre}
                 onChange={handleChange}
                 required
-                className={`w-full border rounded-md p-3 text-sm ${errors.bookGenre ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                className={`w-full border rounded-md p-2 md:p-3 text-xs md:text-sm ${errors.bookGenre ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                 placeholder="e.g., Fiction, Non-fiction, Romance, Thriller"
               />
-              {errors.bookGenre && <p className="text-red-500 text-sm mt-1">{errors.bookGenre}</p>}
+              {errors.bookGenre && <p className="text-red-500 text-xs md:text-sm mt-1">{errors.bookGenre}</p>}
             </div>
 
             <div>
-              <label className="text-black font-semibold block mb-1">
+              <label className="text-black font-semibold block mb-1 text-sm md:text-base">
                 Cover Design Requirements also mention your Binding Type*
               </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                rows={5}
+                rows={4}
                 required
-                className={`w-full border rounded-md p-3 text-sm resize-none ${errors.description ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                className={`w-full border rounded-md p-2 md:p-3 text-xs md:text-sm resize-none ${errors.description ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                 placeholder="Please describe the type of cover design you want. Include details about style, colors, themes, or any specific requirements..."
               ></textarea>
-              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+              {errors.description && <p className="text-red-500 text-xs md:text-sm mt-1">{errors.description}</p>}
             </div>
 
             <div>
-              <label className="text-black font-semibold block mb-1">Please Again Upload Your Book (PDF) *</label>
+              <label className="text-black font-semibold block mb-1 text-sm md:text-base">Please Again Upload Your Book (PDF) *</label>
               <input
                 type="file"
                 accept="application/pdf"
                 onChange={handleFileChange}
                 required
-                className={`w-full border rounded-md p-3 text-sm ${errors.file ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                className={`w-full border rounded-md p-2 md:p-3 text-xs md:text-sm ${errors.file ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
               />
-              {errors.file && <p className="text-red-500 text-sm mt-1">{errors.file}</p>}
+              {errors.file && <p className="text-red-500 text-xs md:text-sm mt-1">{errors.file}</p>}
               {selectedFile && (
-                <p className="text-green-600 text-sm mt-1">
+                <p className="text-green-600 text-xs md:text-sm mt-1">
                   Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                 </p>
               )}
@@ -309,7 +308,7 @@ const CoverExpert = () => {
                   className="bg-gradient-to-r from-[#F8C20A] to-[#EE831E] h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 ></div>
-                <p className="text-center text-sm text-gray-600 mt-1">
+                <p className="text-center text-xs md:text-sm text-gray-600 mt-1">
                   Uploading... {uploadProgress}%
                 </p>
               </div>
@@ -318,7 +317,7 @@ const CoverExpert = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full py-3 text-white text-[16px] font-medium rounded-full shadow-md transition-all ${
+              className={`w-full py-2 md:py-3 text-white text-sm md:text-[16px] font-medium rounded-full shadow-md transition-all ${
                 isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-gradient-to-r from-[#F8C20A] to-[#EE831E] hover:shadow-lg"
               }`}
             >
@@ -326,7 +325,27 @@ const CoverExpert = () => {
             </button>
           </form>
         </div>
+        
       </div>
+      <section className="w-full min-h-screen px-4 md:px-6 py-6 md:py-10 bg-gradient-to-br from-[#eef4ff] to-[#fef6fb] font-sans">
+  <div className="max-w-[909px] mx-auto text-center px-4 md:px-6">
+    <div className="scroll-animate slide-in-up bg-white p-6 md:p-8 lg:p-12 rounded-xl md:rounded-2xl shadow-lg md:shadow-xl">
+      <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-[#2A428C] mb-4 md:mb-6 leading-tight">
+        Contact with Cover Expert
+      </h2>
+      <p className="text-base md:text-lg text-gray-700 mb-6 md:mb-8 max-w-2xl mx-auto">
+       Our expert cover designers are ready to bring your book to life with a stunning cover. 
+        Get in touch with our cover design experts for a custom design that captures the essence of your book..
+      </p>
+      <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+        
+        <button className="px-6 py-3 md:px-10 md:py-4 bg-gradient-to-r from-[#016AB3] to-[#0096CD] text-white font-semibold rounded-full hover:shadow-lg transition-all duration-300 text-sm md:text-lg">
+          Call +1 469-277-7489
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
       <Footer />
     </>
   );

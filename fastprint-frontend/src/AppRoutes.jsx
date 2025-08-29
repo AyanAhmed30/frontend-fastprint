@@ -50,6 +50,7 @@ import ManageOrders from './pages/ManageOrders';
 import OrderInfo from './pages/OrderInfo';
 import ManageShipping from './pages/ManageShipping';
 import AdminPaymentSettings from './pages/AdminPaymentSettings';
+import UserInfo from './pages/UserInfo';
 
 // Payment Gateway
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -104,6 +105,7 @@ const AppRoutes = () => {
       <Route path="/admin/order-info" element={<OrderInfo />} />
       <Route path="/admin/shipping" element={<ManageShipping />} />
       <Route path="/admin/payment" element={<AdminPaymentSettings />} />
+      <Route path="/admin/usersinfo" element={<UserInfo />} />
 
       {/* Admin Book Settings */}
       <Route path="/admin/books/comic/edit" element={<EditComicBook />} />

@@ -13,17 +13,21 @@ const AdminHeader = () => {
   };
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+    <header className="bg-white shadow-md sticky top-0 z-50 w-full">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex justify-between items-center">
         {/* Left: Logo */}
         <div>
-          <img src={FastPrintLogo} alt="Fast Print Guys Logo" className="w-12 h-12" />
+          <img 
+            src={FastPrintLogo} 
+            alt="Fast Print Guys Logo" 
+            className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" 
+          />
         </div>
 
         {/* Right: Logout Button */}
         <button
           onClick={handleLogout}
-          className="px-6 py-2 text-sm font-medium border rounded-full transition-all duration-300"
+          className="px-4 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm font-medium border rounded-full transition-all duration-300 whitespace-nowrap"
           style={{
             color: '#0096CD',
             borderColor: '#0096CD',
@@ -44,16 +48,8 @@ const AdminHeader = () => {
         </button>
       </div>
 
-      {/* Gradient Border */}
-      <svg width="1440" height="6" viewBox="0 0 1440 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1440" height="6" transform="matrix(1 0 0 -1 0 6)" fill="url(#paint0_linear_102_3521)" />
-        <defs>
-          <linearGradient id="paint0_linear_102_3521" x1="547.776" y1="3" x2="1749.68" y2="3" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#D15D9E" />
-            <stop offset="1" stopColor="#5D4495" />
-          </linearGradient>
-        </defs>
-      </svg>
+      {/* Gradient Border - Responsive */}
+      <div className="w-full h-1 bg-gradient-to-r from-[#D15D9E] to-[#5D4495]"></div>
     </header>
   );
 };

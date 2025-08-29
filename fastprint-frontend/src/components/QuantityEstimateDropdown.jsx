@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import BulkDiscountTable from './BulkDiscountTable'; // Adjust path if needed
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import ShippingEstimate from './ShippingEstimate.';
+
 
 // If you do not have a separate InputField, define it here (same as in your app)
 const InputField = ({ label, name, value, onChange, type = 'text', placeholder }) => (
@@ -91,7 +91,7 @@ const QuantityEstimateDropdown = ({
         
             </div>
           )}
-                <ShippingEstimate/>
+                
         </div>
       )}
       

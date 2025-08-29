@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState, useMemo } from 'react';
 import QuantityEstimateDropdown from '../components/QuantityEstimateDropdown';
-
 import Header from '../components/Header';
 import Carousel from '../components/Carousel';
+import PricingBanner from '../components/PricingBanner';
+import Footer from '../components/Footer';
+import RedirectButton from '../components/RedirectButton';
 
+// Import images
 import Book1 from '../assets/images/book1.png';
 import Book2 from '../assets/images/Group.png';
-import RightImage from '../assets/images/right.png';
-
-import PerfectBoundImg from '../assets/images/perfectbound.png';
-import CoilBoundImg from '../assets/images/coilbound.png';
-import SaddleImg from '../assets/images/saddle.png';
-import CaseWrap from '../assets/images/casewrap.png';
-import LinenWrap from '../assets/images/linenwrap.png';
+import PerfectBoundImg from '../assets/images/img58.png';
+import CoilBoundImg from '../assets/images/coill.jpg';
+import SaddleImg from '../assets/images/saddlee.jpg';
+import CaseWrap from '../assets/images/paperbackk.jpg';
+import LinenWrap from '../assets/images/linenn.jpg';
 import StandardBlackAndWhite from '../assets/images/int1.png';
 import PremiumBlackAndWhite from '../assets/images/in2.png';
 import StandardColor from '../assets/images/in3.png';
@@ -22,161 +22,196 @@ import CreamUncoated from '../assets/images/pp1.jpg';
 import WhiteUncoated from '../assets/images/pp2.jpg';
 import WhiteCoated from '../assets/images/pp3.jpg';
 import WhiteCoated2 from '../assets/images/pp4.jpg';
-import Glossy from '../assets/images/glossy.png';
-import Matty from '../assets/images/matty.png';
-import Footer from '../components/Footer';
-import RedirectButton from '../components/RedirectButton';
-import PricingBanner from '../components/PricingBanner';
-import { BASE_URL } from '../services/baseURL';
+import Glossy from '../assets/images/gggg.jpg';
+import Matty from '../assets/images/mmmm.jpg';
+import RightImage from '../assets/images/right.png';
+import ShippingEstimate from '../components/ShippingEstimate.';
 
-const API_BASE = `${BASE_URL}`;
-const getDiscountInfo = (qty) => {
-  if (qty >= 1000) return { percent: 15, price: 17.93 };
-  if (qty >= 500) return { percent: 10, price: 18.98 };
-  if (qty >= 100) return { percent: 5, price: 20.04 };
-  return null;
+// Constants
+const TRIM_SIZES = [
+  'A4 (8.27 x 11.69 in / 210 x 297 mm)',
+  'US Letter (8.5 x 11 in / 216 x 279 mm)',
+
+];
+
+const BINDING_RULES = {
+  3: ['Coil Bound'],
+  4: ['Coil Bound', 'Saddle Stitch'],
+  24: ['Coil Bound', 'Saddle Stitch', 'Case Wrap'],
+  32: ['Perfect Bound', 'Coil Bound', 'Saddle Stitch', 'Case Wrap', 'Linen Wrap']
 };
 
-const imageMap = {
-  bindings: {
-    'Perfect Bound': PerfectBoundImg,
-    'Coil Bound': CoilBoundImg,
-    'Saddle Stitch': SaddleImg,
-    'Case Wrap': CaseWrap,
-    'Linen Wrap': LinenWrap,
-  },
-  interior_colors: {
-    'Standard Black & White': StandardBlackAndWhite,
-    'Premium Black & White': PremiumBlackAndWhite,
-    'Standard Color': StandardColor,
-    'Premium Color': PremiumColor,
-  },
-  paper_types: {
-    '60# Cream-Uncoated': CreamUncoated,
-    '60# White-Uncoated': WhiteUncoated,
-    '70# White-Uncoated': WhiteCoated2,
-    '80# White-Coated': WhiteCoated,
-  },
-  cover_finishes: {
-    Gloss: Glossy,
-    Matte: Matty,
-  },
+const BINDING_CONFIGS = {
+  'Perfect Bound': { img: PerfectBoundImg, price: 2.50 },
+  'Coil Bound': { img: CoilBoundImg, price: 6.18 },
+  'Saddle Stitch': { img: SaddleImg, price: 5.00 },
+  'Case Wrap': { img: CaseWrap, price: 9.75 },
+  'Linen Wrap': { img: LinenWrap, price: 13.80 }
 };
 
-const SelectInput = ({ name, value, options, onChange, placeholder, className }) => (
-  <select
-    name={name}
-    value={value}
-    onChange={onChange}
-    required
-    className={`w-full rounded px-3 border border-white text-sm focus:outline-none ${className}`}
-  >
-    <option value="">{placeholder}</option>
-    {options.map((opt) => (
-      <option key={opt.id} value={opt.id}>
-        {opt.name}
-      </option>
-    ))}
-  </select>
-);
+const OPTIONS_CONFIG = {
+  interiorColor: [
+    { name: "Standard Black & White", img: StandardBlackAndWhite, dbName: "Standard Black & White", price: 0.015 },
+    { name: "Premium Black & White", img: PremiumBlackAndWhite, dbName: "Premium Black & White", price: 0.03 },
+    { name: "Standard Color", img: StandardColor, dbName: "Standard Color", price: 0.12 },
+    { name: "Premium Color", img: PremiumColor, dbName: "Premium Color", price: 0.19 }
+  ],
+  paperType: [
+    { name: "60# Cream-Uncoated", img: CreamUncoated, dbName: "60# Cream-Uncoated", price: 0.01 },
+    { name: "60# White-Uncoated", img: WhiteUncoated, dbName: "60# White-Uncoated", price: 0.01 },
+    { name: "70# White-Uncoated", img: WhiteCoated2, dbName: "70# White-Uncoated", price: 0.02 },
+    { name: "80# White-Coated", img: WhiteCoated, dbName: "80# White-Coated", price: 0.03 }
+  ],
+  coverFinish: [
+    { name: "Gloss", img: Glossy, dbName: "Gloss", price: 0.00 },
+    { name: "Matte", img: Matty, dbName: "Matte", price: 0.00 }
+  ]
+};
 
-const InputField = ({ name, value, onChange, type, placeholder, min, max, className }) => (
+const DISCOUNTS = [
+  { min: 1000, percent: 15 },
+  { min: 500, percent: 10 },
+  { min: 100, percent: 5 }
+];
+
+// Utility Functions
+const getAvailableBindings = (pageCount) => {
+  if (!pageCount || pageCount < 3) return [];
+  
+  let availableBindings = [];
+  
+  // Apply binding rules based on page count
+  if (pageCount >= 32) {
+    availableBindings = BINDING_RULES[32];
+  } else if (pageCount >= 24) {
+    availableBindings = BINDING_RULES[24];
+  } else if (pageCount >= 4) {
+    availableBindings = BINDING_RULES[4];
+  } else if (pageCount >= 3) {
+    availableBindings = BINDING_RULES[3];
+  }
+  
+  return availableBindings;
+};
+
+const calculatePrice = (formData) => {
+  const { trim_size_id, page_count, binding_id, interior_color_id, paper_type_id, cover_finish_id, quantity } = formData;
+  
+  if (!trim_size_id || !page_count || !binding_id || !interior_color_id || !paper_type_id || !cover_finish_id || !quantity) {
+    return null;
+  }
+
+  // Get pricing components
+  const bindingPrice = BINDING_CONFIGS[binding_id]?.price || 0;
+  const interiorColorOption = OPTIONS_CONFIG.interiorColor.find(opt => opt.dbName === interior_color_id);
+  const paperTypeOption = OPTIONS_CONFIG.paperType.find(opt => opt.dbName === paper_type_id);
+  const coverFinishOption = OPTIONS_CONFIG.coverFinish.find(opt => opt.dbName === cover_finish_id);
+
+  const interiorColorPrice = (interiorColorOption?.price || 0) * page_count;
+  const paperTypePrice = (paperTypeOption?.price || 0) * page_count;
+  const coverFinishPrice = coverFinishOption?.price || 0;
+
+  // Calculate unit price
+  const unitPrice = bindingPrice + interiorColorPrice + paperTypePrice + coverFinishPrice;
+  const totalPrice = unitPrice * quantity;
+
+  // Apply discount
+  const discount = DISCOUNTS.find(d => quantity >= d.min);
+  const discountAmount = discount ? totalPrice * (discount.percent / 100) : 0;
+  const finalPrice = totalPrice - discountAmount;
+
+  return {
+    unitPrice: unitPrice.toFixed(2),
+    totalPrice: totalPrice.toFixed(2),
+    discount: discountAmount.toFixed(2),
+    discountPercent: discount?.percent || 0,
+    finalPrice: finalPrice.toFixed(2)
+  };
+};
+
+// Reusable Components
+const FormInput = ({ type = 'text', name, value, onChange, placeholder, className = "", disabled = false, ...props }) => (
   <input
     type={type}
     name={name}
     value={value}
     onChange={onChange}
     placeholder={placeholder}
-    min={min}
-    max={max}
-    className={`w-full rounded px-3 border border-white text-sm focus:outline-none ${className}`}
+    className={`w-full border px-3 py-2 rounded ${className} ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
+    disabled={disabled}
+    required
+    {...props}
   />
 );
 
-const OptionField = ({ title, name, options, images, form, handleChange, disabled }) => (
-  <fieldset>
-    <legend className="font-semibold text-gray-700 mb-3">{title}</legend>
-    <div className="flex flex-wrap gap-6">
-      {options.map((opt) => {
-        const isSelected = form[name] === opt.id;
-        const imageSource = images[opt.name];
-        
-        // Debug logging for specific images
-        if (['Perfect Bound', 'Coil Bound', 'Premium Black & White', '60# White-Uncoated'].includes(opt.name)) {
-          console.log(`${opt.name} image source:`, imageSource);
-        }
-        
-        return (
-          <label
-            key={opt.id}
-            className={`cursor-pointer flex flex-col items-center w-24 p-2 border rounded transition
-              ${isSelected ? 'border-blue-600 bg-blue-100' : 'border-gray-300'}
-              ${disabled ? 'opacity-50 pointer-events-none' : ''}
-            `}
-          >
-            <input
-              type="radio"
-              name={name}
-              value={opt.id}
-              checked={isSelected}
-              onChange={handleChange}
-              disabled={disabled}
-              className="mb-2 peer"
-            />
-            {imageSource ? (
-              <img 
-                src={imageSource} 
-                alt={opt.name} 
-                className="w-16 h-16 object-contain mb-1 border"
-                style={{ 
-                  maxWidth: '64px', 
-                  maxHeight: '64px',
-                  display: 'block',
-                  backgroundColor: '#f9f9f9'
-                }}
-                onError={(e) => {
-                  console.error(`Failed to load image for ${opt.name}:`, imageSource);
-                  e.target.style.display = 'none';
-                  e.target.nextElementSibling.style.display = 'flex';
-                }}
-                onLoad={(e) => {
-                  console.log(`Successfully loaded image for ${opt.name}`);
-                  e.target.style.display = 'block';
-                  if (e.target.nextElementSibling) {
-                    e.target.nextElementSibling.style.display = 'none';
-                  }
-                }}
-              />
-            ) : null}
-            <div 
-              className="w-16 h-16 bg-gray-200 rounded mb-1 flex items-center justify-center"
-              style={{ display: imageSource ? 'none' : 'flex' }}
-            >
-              <span className="text-xs text-gray-500 text-center">
-                {imageSource ? 'Loading...' : 'No Image'}
-              </span>
-            </div>
-            <span className="text-center text-sm font-medium">{opt.name}</span>
-          </label>
-        );
-      })}
-    </div>
-  </fieldset>
+const FormSelect = ({ name, value, onChange, options, placeholder, className = "", disabled = false }) => (
+  <select
+    name={name}
+    value={value}
+    onChange={onChange}
+    className={`w-full border px-3 py-2 rounded ${className} ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
+    disabled={disabled}
+    required
+  >
+    <option value="">{placeholder}</option>
+    {options.map((option, idx) => (
+      <option key={idx} value={typeof option === 'object' ? option.name : option}>
+        {typeof option === 'object' ? option.name : option}
+      </option>
+    ))}
+  </select>
 );
 
-const InfoRow = ({ label, value }) => (
-  <div className="flex justify-between border-b border-gray-200 pb-1 text-gray-700">
-    <span className="font-semibold">{label}</span>
-    <span>{value}</span>
+const OptionCard = ({ item, fieldName, fieldValue, onSelect, isAvailable, stepAccessible, hasDbName = false }) => {
+  const canSelect = isAvailable && stepAccessible;
+  const opacity = !stepAccessible ? 0.3 : (!isAvailable ? 0.5 : 1);
+  const value = hasDbName ? item.dbName : item.name;
+  
+  return (
+    <label 
+      className={`flex flex-col items-center cursor-pointer relative w-20 sm:w-24 ${!canSelect ? 'cursor-not-allowed' : ''}`} 
+      style={{ opacity }}
+    >
+      <div className="relative w-full">
+        <input
+          type="radio"
+          name={fieldName}
+          value={value}
+          checked={fieldValue === value}
+          onChange={() => canSelect && onSelect(value)}
+          disabled={!canSelect}
+          className="absolute top-1 left-1 z-10 w-3 h-3"
+        />
+        <img 
+          src={item.img} 
+          alt={item.name} 
+          className="w-full h-auto object-contain mb-2 mt-3 rounded" 
+        />
+      </div>
+      <p className="text-xs sm:text-sm text-[#2A428C] text-center px-1">{item.name}</p>
+    </label>
+  );
+};
+
+const SectionTitle = ({ children }) => (
+  <>
+    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 text-[#2A428C]">{children}</h2>
+    <div className="w-full h-0.5 bg-gray-200 mb-4 sm:mb-6"></div>
+  </>
+);
+
+const SummaryRow = ({ pairs }) => (
+  <div className="flex justify-between mb-2 text-sm">
+    {pairs.map(([label, value], j) => (
+      <div key={j}>
+        <p className="font-semibold text-gray-600">{label}</p>
+        <p className="text-black">{value}</p>
+      </div>
+    ))}
   </div>
 );
 
-const getNameById = (list, id) => list?.find((opt) => opt.id === id)?.name || '-';
-
 const MagazineCalculator = () => {
-  const [dropdowns, setDropdowns] = useState({});
-  const [allBindings, setAllBindings] = useState([]);
-  const [bindings, setBindings] = useState([]);
   const [form, setForm] = useState({
     trim_size_id: '',
     page_count: '',
@@ -184,184 +219,351 @@ const MagazineCalculator = () => {
     interior_color_id: '',
     paper_type_id: '',
     cover_finish_id: '',
-    quantity: 1,
+    quantity: 1
   });
   const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [calculating, setCalculating] = useState(false);
 
-  useEffect(() => {
-    axios.get(`${API_BASE}api/magazine/dropdowns/`)
-      .then((res) => {
-        setDropdowns(res.data);
-        setAllBindings(res.data.binding_types || []);
-      })
-      .catch(() => alert('Failed to load dropdowns.'))
-      .finally(() => setLoading(false));
-  }, []);
+  const availableBindings = useMemo(() => 
+    getAvailableBindings(Number(form.page_count)), 
+    [form.page_count]
+  );
 
-  useEffect(() => {
-    const { trim_size_id, page_count } = form;
-    if (trim_size_id && page_count) {
-      axios.get(`${API_BASE}api/magazine/bindings/`, { params: { trim_size_id, page_count } })
-        .then((res) => setBindings(res.data))
-        .catch(() => alert('Failed to load bindings.'));
-    } else {
-      setBindings([]);
-    }
-  }, [form.trim_size_id, form.page_count]);
+  const stepAccessibility = useMemo(() => ({
+    trimSize: true,
+    pageCount: form.trim_size_id !== '',
+    binding: form.trim_size_id !== '' && form.page_count !== '',
+    interiorColor: form.trim_size_id !== '' && form.page_count !== '' && form.binding_id !== '',
+    paperType: form.trim_size_id !== '' && form.page_count !== '' && form.binding_id !== '' && form.interior_color_id !== '',
+    coverFinish: form.trim_size_id !== '' && form.page_count !== '' && form.binding_id !== '' && form.interior_color_id !== '' && form.paper_type_id !== ''
+  }), [form]);
+
+  const bindingOptions = useMemo(() => 
+    Object.entries(BINDING_CONFIGS).map(([name, config]) => ({
+      name,
+      img: config.img
+    })), []
+  );
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({
+    const { name, value, type } = e.target;
+    const val = type === 'number' ? (value === '' ? '' : Number(value)) : value;
+    
+    // Reset dependent fields when parent fields change
+    const resetFields = {
+      trim_size_id: ['page_count', 'binding_id', 'interior_color_id', 'paper_type_id', 'cover_finish_id'],
+      page_count: ['binding_id', 'interior_color_id', 'paper_type_id', 'cover_finish_id'],
+      binding_id: ['interior_color_id', 'paper_type_id', 'cover_finish_id'],
+      interior_color_id: ['paper_type_id', 'cover_finish_id'],
+      paper_type_id: ['cover_finish_id']
+    };
+
+    setForm(prev => {
+      const newForm = { ...prev, [name]: val };
+      resetFields[name]?.forEach(field => {
+        newForm[field] = '';
+      });
+      return newForm;
+    });
+    setResult(null);
+  };
+
+  const handleBindingSelect = (value) => {
+    setForm(prev => ({
       ...prev,
-      [name]: name === 'quantity' || name === 'page_count' ? Number(value) : value,
+      binding_id: value,
+      interior_color_id: '',
+      paper_type_id: '',
+      cover_finish_id: ''
     }));
     setResult(null);
   };
 
-  const handlePageCount = (e) => {
-    let val = e.target.value;
-    if (val === '') return handleChange(e);
-    const numVal = Number(val);
-    if (numVal > 200) {
-      handleChange({ ...e, target: { ...e.target, value: '200' } });
-    } else if (numVal < 1) {
-      handleChange({ ...e, target: { ...e.target, value: '1' } });
-    } else {
-      handleChange(e);
-    }
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setCalculating(true);
-    try {
-      const res = await axios.post(`${API_BASE}api/magazine/calculate/`, form);
-      setResult(res.data);
-    } catch {
-      alert('Calculation failed.');
-    } finally {
-      setCalculating(false);
+    
+    if (!form.trim_size_id || !form.page_count || !form.binding_id || 
+        !form.interior_color_id || !form.paper_type_id || !form.cover_finish_id || 
+        form.quantity <= 0) {
+      alert("Please fill in all required fields and ensure quantity is positive.");
+      return;
     }
+    
+    setResult(calculatePrice(form));
   };
 
-  const showFilteredBindings = form.trim_size_id && form.page_count;
-  const bindingOptions = showFilteredBindings ? bindings : allBindings;
+  // Reset binding if it becomes unavailable
+  useEffect(() => {
+    if (form.binding_id && !availableBindings.includes(form.binding_id)) {
+      setForm(prev => ({
+        ...prev,
+        binding_id: '',
+        interior_color_id: '',
+        paper_type_id: '',
+        cover_finish_id: ''
+      }));
+    }
+  }, [availableBindings, form.binding_id]);
 
   return (
     <>
       <Header />
-      <PricingBanner />
-
+      
+      {/* Pricing Banner */}
+      <section className="relative w-full max-w-none h-auto rounded-[20px] border-[5px] border-white/50 backdrop-blur-xl px-4 sm:px-6 md:px-10 py-8 flex flex-col md:flex-row items-center justify-between bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC]">
+        <div className="w-full md:w-1/2 text-white text-center md:text-left mb-6 md:mb-0">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3">Pricing <span className="text-[#F8C20A]">Calculator</span></h2>
+          <p className="text-sm sm:text-base leading-relaxed px-2 md:px-0">Calculate your magazine's printing costs, see distribution options, estimate potential earnings, and download free templates with our magazine cost calculator.</p>
+        </div>
+        <div className="w-full md:w-1/2 flex justify-center md:justify-end items-center relative">
+          <div className="flex items-center relative">
+            <img src={Book1} alt="Book1" className="w-32 sm:w-40 md:w-52 lg:w-60 h-auto object-contain z-10" style={{ marginRight: '-135px' }} />
+            <img src={Book2} alt="Book2" className="w-36 sm:w-44 md:w-56 lg:w-64 h-auto object-contain rotate-[4deg] z-0" />
+          </div>
+        </div>
+      </section>
+      
       <Carousel />
 
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
-        {loading ? (
-          <p className="text-blue-700">Loading options...</p>
-        ) : (
-          <div className="flex w-full max-w-6xl gap-8">
-            <form onSubmit={handleSubmit} className="flex-1 bg-white p-8 rounded-lg shadow-lg flex flex-col gap-6">
-              {/* Trim Size + Page Count */}
-              <div
-                className="flex flex-col gap-4 px-4 py-4 mb-8"
-                style={{
-                  background: 'linear-gradient(90deg, #016AB3 16.41%, #0096CD 60.03%, #00AEDC 87.93%)',
-                  border: '1px solid #E5E5E5',
-                  borderRadius: '20px',
-                }}
-              >
-                <h3 style={{ color: 'white' }} className="text-lg font-semibold">Book Size & Page Count</h3>
-                <div className="flex gap-4 items-end">
-                  <div className="w-1/2">
-                    <SelectInput
-                      name="trim_size_id"
-                      value={dropdowns.trim_sizes ? form.trim_size_id : ''}
-                      options={dropdowns.trim_sizes || []}
-                      onChange={handleChange}
-                      placeholder="Select Book Size"
-                      className="h-12"
-                    />
-                  </div>
-                  <div className="w-1/2">
-                    <p className="text-xs text-white mb-1 opacity-90">Maximum page count is 200</p>
-                    <InputField
-                      type="number"
-                      name="page_count"
-                      value={form.page_count}
-                      onChange={handlePageCount}
-                      placeholder="Enter Page Count"
-                      min="1"
-                      max="200"
-                      className="h-12"
-                    />
-                  </div>
+      <div className="w-full min-h-screen px-4 sm:px-6 lg:px-8 py-8 flex flex-col xl:flex-row gap-6 xl:gap-8">
+        <div className="w-full xl:w-3/5 bg-gradient-to-br from-blue-50 to-blue-100 p-4 sm:p-6 lg:p-8 rounded-2xl">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-[#2A428C]">Magazine Book</h2>
+          
+          {/* Book Size & Page Count */}
+          <div className="flex flex-col gap-4 p-4 mb-8 bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] rounded-2xl">
+            <h3 className="text-white text-lg font-semibold">Book Size & Page Count</h3>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="w-full sm:w-1/2 flex flex-col">
+                <div className="h-5 mb-1">
+                  <p className="text-xs text-white opacity-90">Trim Size</p>
                 </div>
+                <FormSelect
+                  name="trim_size_id"
+                  value={form.trim_size_id}
+                  onChange={handleChange}
+                  options={TRIM_SIZES}
+                  placeholder="Select Book Size"
+                  className="h-12"
+                />
               </div>
-
-              <OptionField
-                title="Binding Type"
-                name="binding_id"
-                options={bindingOptions}
-                images={imageMap.bindings}
-                form={form}
-                handleChange={handleChange}
-                disabled={showFilteredBindings && bindings.length === 0}
-              />
-
-              <OptionField
-                title="Interior Color"
-                name="interior_color_id"
-                options={dropdowns.interior_colors || []}
-                images={imageMap.interior_colors}
-                form={form}
-                handleChange={handleChange}
-              />
-              <OptionField
-                title="Paper Type"
-                name="paper_type_id"
-                options={dropdowns.paper_types || []}
-                images={imageMap.paper_types}
-                form={form}
-                handleChange={handleChange}
-              />
-              <OptionField
-                title="Cover Finish"
-                name="cover_finish_id"
-                options={dropdowns.cover_finishes || []}
-                images={imageMap.cover_finishes}
-                form={form}
-                handleChange={handleChange}
-              />
-
-              <QuantityEstimateDropdown
-                form={form}
-                handleChange={handleChange}
-                handleSubmit={handleSubmit}
-                result={result}
-                getDiscountInfo={getDiscountInfo}
-                calculating={calculating}
-                loading={loading}
-              />
-            </form>
-
-            <aside className="w-96 bg-white rounded-lg shadow-lg p-6 flex flex-col">
-              <img src={RightImage} alt="Magazine" className="w-full h-48 object-cover rounded mb-6" />
-              <h2 className="text-2xl font-bold text-blue-900 mb-4 text-center">High-Quality Magazine Printing</h2>
-              <div className="space-y-4 flex-grow">
-                <InfoRow label="Trim Size" value={getNameById(dropdowns.trim_sizes, form.trim_size_id)} />
-                <InfoRow label="Page Count" value={form.page_count || '-'} />
-                <InfoRow label="Binding Type" value={getNameById(bindingOptions, form.binding_id)} />
-                <InfoRow label="Interior Color" value={getNameById(dropdowns.interior_colors, form.interior_color_id)} />
-                <InfoRow label="Paper Type" value={getNameById(dropdowns.paper_types, form.paper_type_id)} />
-                <InfoRow label="Cover Finish" value={getNameById(dropdowns.cover_finishes, form.cover_finish_id)} />
-                <InfoRow label="Quantity" value={form.quantity} />
-                <RedirectButton />
+              <div className="w-full sm:w-1/2 flex flex-col">
+                <div className="h-5 mb-1">
+                  <p className="text-xs text-white opacity-90">
+                    {form.trim_size_id ? 'MIN-MAX: 3-200' : 'Select book size first'}
+                  </p>
+                </div>
+                <FormInput
+                  name="page_count"
+                  value={form.page_count}
+                  onChange={handleChange}
+                  type="number"
+                  placeholder="Enter Page Count"
+                  min="3"
+                  max="200"
+                  className="h-12 bg-white text-black rounded-md"
+                  disabled={!stepAccessibility.pageCount}
+                />
               </div>
-            </aside>
+            </div>
           </div>
-        )}
+
+          {/* Binding Types */}
+          <SectionTitle>Binding Types</SectionTitle>
+          
+          {/* Paperback Options */}
+          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#2A428C]">Paperback Options</h3>
+          <div className="flex gap-3 sm:gap-4 lg:gap-6 mb-6 flex-wrap">
+            {bindingOptions.filter(binding => ['Coil Bound', 'Saddle Stitch', 'Perfect Bound'].includes(binding.name)).map((binding, idx) => (
+              <OptionCard
+                key={idx}
+                item={binding}
+                fieldName="binding_id"
+                fieldValue={form.binding_id}
+                onSelect={handleBindingSelect}
+                isAvailable={availableBindings.includes(binding.name)}
+                stepAccessible={stepAccessibility.binding}
+              />
+            ))}
+          </div>
+
+          {/* Hardcover Options */}
+          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#2A428C]">Hardcover Options</h3>
+          <div className="flex gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10 flex-wrap">
+            {bindingOptions.filter(binding => ['Case Wrap', 'Linen Wrap'].includes(binding.name)).map((binding, idx) => (
+              <OptionCard
+                key={idx}
+                item={binding}
+                fieldName="binding_id"
+                fieldValue={form.binding_id}
+                onSelect={handleBindingSelect}
+                isAvailable={availableBindings.includes(binding.name)}
+                stepAccessible={stepAccessibility.binding}
+              />
+            ))}
+          </div>
+
+          {/* Interior Color */}
+          <SectionTitle>Interior Color</SectionTitle>
+          <div className="flex gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10 flex-wrap">
+            {OPTIONS_CONFIG.interiorColor.map((item, idx) => (
+              <OptionCard
+                key={idx}
+                item={item}
+                fieldName="interior_color_id"
+                fieldValue={form.interior_color_id}
+                onSelect={(value) => setForm(prev => ({ ...prev, interior_color_id: value }))}
+                isAvailable={true}
+                stepAccessible={stepAccessibility.interiorColor}
+                hasDbName={true}
+              />
+            ))}
+          </div>
+
+          {/* Paper Type */}
+          <SectionTitle>Paper Type</SectionTitle>
+          <div className="flex gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10 flex-wrap">
+            {OPTIONS_CONFIG.paperType.map((item, idx) => (
+              <OptionCard
+                key={idx}
+                item={item}
+                fieldName="paper_type_id"
+                fieldValue={form.paper_type_id}
+                onSelect={(value) => setForm(prev => ({ ...prev, paper_type_id: value }))}
+                isAvailable={true}
+                stepAccessible={stepAccessibility.paperType}
+                hasDbName={true}
+              />
+            ))}
+          </div>
+
+          {/* Cover Finish */}
+          <SectionTitle>Cover Finish</SectionTitle>
+          <div className="flex gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10 flex-wrap">
+            {OPTIONS_CONFIG.coverFinish.map((item, idx) => (
+              <OptionCard
+                key={idx}
+                item={item}
+                fieldName="cover_finish_id"
+                fieldValue={form.cover_finish_id}
+                onSelect={(value) => setForm(prev => ({ ...prev, cover_finish_id: value }))}
+                isAvailable={true}
+                stepAccessible={stepAccessibility.coverFinish}
+                hasDbName={true}
+              />
+            ))}
+          </div>
+
+          {/* Quantity & Calculate */}
+          <div className="flex flex-col gap-4 p-4 bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] rounded-2xl">
+            <h3 className="text-white text-lg font-semibold">Quantity & Pricing</h3>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="w-full sm:w-1/2">
+                <p className="text-xs text-white opacity-90 mb-1">Quantity</p>
+                <FormInput
+                  name="quantity"
+                  value={form.quantity}
+                  onChange={handleChange}
+                  type="number"
+                  placeholder="Enter Quantity"
+                  min="1"
+                  className="h-12 bg-white text-black rounded-md"
+                />
+              </div>
+              <div className="w-full sm:w-1/2 flex items-end">
+                <button
+                  onClick={handleSubmit}
+                  className="w-full h-12 bg-[#F8C20A] hover:bg-yellow-500 text-black font-semibold rounded-md transition-colors"
+                >
+                  Calculate Price
+                </button>
+              </div>
+            </div>
+
+            {result && (
+              <div className="bg-white/20 rounded-lg p-4 text-white">
+                <h4 className="font-semibold mb-2">Pricing Results:</h4>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span>Unit Price:</span>
+                    <span>${result.unitPrice}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total ({form.quantity} magazines):</span>
+                    <span>${result.totalPrice}</span>
+                  </div>
+                  {result.discount > 0 && (
+                    <>
+                      <div className="flex justify-between text-green-200">
+                        <span>Discount ({result.discountPercent}%):</span>
+                        <span>-${result.discount}</span>
+                      </div>
+                      <div className="flex justify-between font-semibold text-yellow-200">
+                        <span>Final Price:</span>
+                        <span>${result.finalPrice}</span>
+                      </div>
+                    </>
+                  )}
+                  {form.quantity >= 100 && (
+                    <div className="mt-2 text-xs text-green-200">
+                      ✓ Bulk discount applied! 
+                      {form.quantity >= 1000 ? ' (15% off)' : 
+                       form.quantity >= 500 ? ' (10% off)' : ' (5% off)'}
+                    </div>
+                  )}
+                </div>
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h3 className="text-sm font-semibold text-[#2A428C] mb-2">Bulk Discount Tiers</h3>
+          <div className="space-y-1 text-xs text-gray-600">
+            <div className="flex justify-between">
+              <span>100-499 books:</span>
+              <span className={form.quantity >= 100 && form.quantity < 500 ? 'font-semibold text-green-600' : ''}>5% off</span>
+            </div>
+            <div className="flex justify-between">
+              <span>500-999 books:</span>
+              <span className={form.quantity >= 500 && form.quantity < 1000 ? 'font-semibold text-green-600' : ''}>10% off</span>
+            </div>
+            <div className="flex justify-between">
+              <span>1000+ books:</span>
+              <span className={form.quantity >= 1000 ? 'font-semibold text-green-600' : ''}>15% off</span>
+            </div>
+          </div>
+        </div>
+                <ShippingEstimate/>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Summary Sidebar */}
+        <div className="w-full xl:w-2/5 bg-white p-4 sm:p-6 lg:p-8 rounded-2xl shadow-lg">
+          <img 
+            src={RightImage} 
+            alt="High-Quality Magazine" 
+            className="w-full h-32 sm:h-40 lg:h-48 object-cover mb-4 rounded" 
+          />
+          <h2 className="text-lg sm:text-xl font-bold text-[#2A428C] mb-2 text-center">
+            High-Quality Magazine Printing
+          </h2>
+          <div className="w-full h-0.5 bg-gray-300 mb-4"></div>
+          
+          {[
+            [['Trim Size', form.trim_size_id || '-'], ['Page Count', form.page_count || '-']],
+            [['Binding Type', form.binding_id || '-'], ['Interior Color', form.interior_color_id || '-']],
+            [['Paper Type', form.paper_type_id || '-'], ['Cover Finish', form.cover_finish_id || '-']],
+          ].map((row, i) => (
+            <React.Fragment key={i}>
+              <SummaryRow pairs={row.filter(([label]) => label)} />
+              <div className={`w-full h-px bg-gray-200 ${i === 2 ? 'my-4' : 'my-2'}`}></div>
+            </React.Fragment>
+          ))}
+
+          <div className="flex justify-center mt-6">
+            <div className="w-full max-w-xs">
+              <RedirectButton />
+            </div>
+          </div>
+        </div>
       </div>
+      
       <Footer />
     </>
   );

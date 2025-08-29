@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import QuantityEstimateDropdown from '../components/QuantityEstimateDropdown';
+import React, { useState, useMemo, useEffect } from 'react';
 
-import PerfectBoundImg from '../assets/images/perfectbound.png';
+import PerfectBoundImg from '../assets/images/img58.png';
 import Book1 from '../assets/images/book1.png';
 import Book2 from '../assets/images/Group.png';
 
-import CoilBoundImg from '../assets/images/coilbound.png';
-import SaddleImg from '../assets/images/saddle.png';
-import CaseWrap from '../assets/images/casewrap.png';
-import LinenWrap from '../assets/images/linenwrap.png';
+import CoilBoundImg from '../assets/images/coill.jpg';
+import SaddleImg from '../assets/images/saddlee.jpg';
+import CaseWrap from '../assets/images/paperbackk.jpg';
+import LinenWrap from '../assets/images/linenn.jpg';
 
 import StandardBlackandWhite from '../assets/images/int1.png';
 import PremiumBlackandWhite from '../assets/images/in2.png';
@@ -21,76 +19,170 @@ import Whiteuncoated from '../assets/images/pp2.jpg';
 import Whitecoated from '../assets/images/pp3.jpg';
 import Whitecoatedd from '../assets/images/pp4.jpg';
 
-import Glossy from '../assets/images/glossy.png';
-import Matty from '../assets/images/matty.png';
+import Glossy from '../assets/images/gggg.jpg';
+import Matty from '../assets/images/mmmm.jpg';
 
 import RightImage from '../assets/images/right.png';
 
 import Header from '../components/Header';
 import Carousel from '../components/Carousel';
-import PricingBanner from '../components/PricingBanner';
 import Footer from '../components/Footer';
 import RedirectButton from '../components/RedirectButton';
+import ShippingEstimate from '../components/ShippingEstimate.';
+import PricingBanner from '../components/PricingBanner';
 
-import { BASE_URL } from '../services/baseURL';
+// Hardcoded data based on your comic book logic
+const COMIC_TRIM_SIZES = [
+  { id: 1, name: 'Comic Book (6.625 x 10.25 in / 168 x 260 mm)' },
+  { id: 2, name: 'Larger Deluxe: (7 x 10.875 in / 177.8 mm x 276.23 mm)' },
+  { id: 3, name: 'Manga (Japanese Style Comics): (5 x 7.5 in / 127 mm x 190.5 mm)' }
+];
 
+const INTERIOR_COLORS = [
+  { id: 1, name: 'Premium Black & White', price: 0.0325, dbName: 'Premium Black & White' },
+  { id: 2, name: 'Premium Color', price: 0.19, dbName: 'Premium Color' }
+];
 
-const API_BASE = `${BASE_URL}`;
+const PAPER_TYPES = [
+  { id: 1, name: '70# White-Uncoated', price: 0.02, dbName: '70# White-Uncoated' },
+  { id: 2, name: '60# Cream-Uncoated', price: 0.01, dbName: '60# Cream-Uncoated' },
+  { id: 3, name: '60# White-Uncoated', price: 0.01, dbName: '60# White-Uncoated' },
+  { id: 4, name: '80# White-Coated', price: 0.03, dbName: '80# White-Coated' }
+];
 
-// Discount info function
-const getDiscountInfo = (qty) => {
-  if (qty >= 1000) return { percent: 15, price: 17.93 };
-  if (qty >= 500) return { percent: 10, price: 18.98 };
-  if (qty >= 100) return { percent: 5, price: 20.04 };
-  return null;
+const COVER_FINISHES = [
+  { id: 1, name: 'Gloss', price: 0.00, dbName: 'Gloss' },
+  { id: 2, name: 'Matte', price: 0.00, dbName: 'Matte' }
+];
+
+// Binding pricing based on trim size
+const BINDING_PRICES = {
+  1: { // Comic Book (6.625 x 10.25 in / 168 x 260 mm)
+    'Perfect Bound': 2.50,
+    'Saddle Stitch': 5.00,
+    'Case Wrap': 9.75,
+    'Linen Wrap': 13.80,
+    'Coil Bound': 6.18
+  },
+  2: { // Larger Deluxe: (7 x 10.875 in / 177.8 mm x 276.23 mm)
+    'Perfect Bound': 3.00,
+    'Saddle Stitch': 5.00,
+    'Case Wrap': 9.75,
+    'Linen Wrap': 13.80,
+    'Coil Bound': 6.18
+  },
+  3: { // Manga (Japanese Style Comics): (5 x 7.5 in / 127 mm x 190.5 mm)
+    'Perfect Bound': 2.50,
+    'Saddle Stitch': 5.00,
+    'Case Wrap': 9.75,
+    'Linen Wrap': 13.80,
+    'Coil Bound': 6.18
+  }
 };
 
-// OptionField component for rendering radio options with images
-const OptionField = ({ title, name, options, images, form, handleChange }) => (
-  <fieldset>
-    <legend className="font-semibold text-gray-700 mb-3">{title}</legend>
-    <div className="flex flex-wrap gap-6">
-      {options.map(opt => (
-        <label
-          key={opt.id}
-          className={`cursor-pointer flex flex-col items-center w-24 p-2 border rounded transition ${
-            form[name] === opt.id ? 'border-blue-600 bg-blue-100' : 'border-gray-300'
-          }`}
-        >
-          <input
-            type="radio"
-            name={name}
-            value={opt.id}
-            checked={form[name] === opt.id}
-            onChange={handleChange}
-            className="mb-2"
-          />
-          {images[opt.name] ? (
-            <img src={images[opt.name]} alt={opt.name} className="w-16 h-16 object-contain mb-1" />
-          ) : (
-            <div className="w-16 h-16 flex items-center justify-center text-xs text-red-500 border border-red-300 mb-1">
-              No Image
-            </div>
-          )}
-          <span className="text-center text-sm">{opt.name}</span>
-        </label>
-      ))}
-    </div>
-  </fieldset>
+// Binding availability rules based on page count
+const BINDING_RULES = {
+  'Coil Bound': { minPages: 3, type: 'paperback' },
+  'Saddle Stitch': { minPages: 4, type: 'paperback' },
+  'Perfect Bound': { minPages: 32, type: 'paperback' },
+  'Case Wrap': { minPages: 24, type: 'hardcover' },
+  'Linen Wrap': { minPages: 32, type: 'hardcover' }
+};
+
+// Get available bindings based on page count
+const getAvailableBindings = (pageCount) => {
+  if (!pageCount || pageCount < 3) return [];
+  
+  const available = [];
+  Object.entries(BINDING_RULES).forEach(([bindingName, rule]) => {
+    if (pageCount >= rule.minPages) {
+      available.push(bindingName);
+    }
+  });
+  
+  return available;
+};
+
+// Calculate price
+const calculatePrice = (formData) => {
+  const { trim_size_id, page_count, binding_id, interior_color_id, paper_type_id, cover_finish_id, quantity } = formData;
+  
+  if (!trim_size_id || !page_count || !binding_id || !interior_color_id || !paper_type_id || !cover_finish_id || !quantity) {
+    return null;
+  }
+
+  // Get prices
+  const bindingPrice = BINDING_PRICES[trim_size_id]?.[binding_id] || 0;
+  const interiorColorPrice = INTERIOR_COLORS.find(ic => ic.dbName === interior_color_id)?.price || 0;
+  const paperTypePrice = PAPER_TYPES.find(pt => pt.dbName === paper_type_id)?.price || 0;
+  const coverFinishPrice = COVER_FINISHES.find(cf => cf.dbName === cover_finish_id)?.price || 0;
+
+  // Calculate unit price
+  const unitPrice = bindingPrice + (interiorColorPrice * page_count) + (paperTypePrice * page_count) + coverFinishPrice;
+  const totalPrice = unitPrice * quantity;
+
+  // Calculate discount
+  let discount = null;
+  if (quantity >= 1000) discount = { percent: 15 };
+  else if (quantity >= 500) discount = { percent: 10 };
+  else if (quantity >= 100) discount = { percent: 5 };
+
+  const discountAmount = discount ? (totalPrice * discount.percent) / 100 : 0;
+  const finalPrice = totalPrice - discountAmount;
+
+  return {
+    unitPrice: unitPrice.toFixed(2),
+    totalPrice: totalPrice.toFixed(2),
+    discountAmount: discountAmount.toFixed(2),
+    discountPercent: discount?.percent || 0,
+    finalPrice: finalPrice.toFixed(2)
+  };
+};
+
+// Reusable Components
+const OptionCard = ({ item, fieldName, fieldValue, onSelect, isAvailable, stepAccessible, hasDbName = false }) => {
+  const canSelect = isAvailable && stepAccessible;
+  const opacity = !stepAccessible ? 0.3 : (!isAvailable ? 0.5 : 1);
+  const value = hasDbName ? item.dbName : item.name;
+  
+  return (
+    <label className={`flex flex-col items-center cursor-pointer relative w-20 sm:w-24 ${!canSelect ? 'cursor-not-allowed' : ''}`} style={{ opacity }}>
+      <div className="relative w-full">
+        <input 
+          type="radio" 
+          name={fieldName} 
+          value={value} 
+          checked={fieldValue === value} 
+          onChange={() => canSelect && onSelect(value)} 
+          disabled={!canSelect} 
+          className="absolute top-1 left-1 z-10 w-3 h-3" 
+        />
+        <img src={item.img} alt={item.name} className="w-full h-auto object-contain mb-2 mt-3 rounded" />
+      </div>
+      <p className="text-xs sm:text-sm text-[#2A428C] text-center px-1">{item.name}</p>
+    </label>
+  );
+};
+
+const SectionTitle = ({ children }) => (
+  <>
+    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 text-[#2A428C]">{children}</h2>
+    <div className="w-full h-0.5 bg-gray-200 mb-4 sm:mb-6"></div>
+  </>
 );
 
-// InfoRow component for summary display
-const InfoRow = ({ label, value }) => (
-  <div className="flex justify-between border-b border-gray-200 pb-1 text-gray-700">
-    <span className="font-semibold">{label}</span>
-    <span>{value}</span>
+const SummaryRow = ({ pairs }) => (
+  <div className="flex justify-between mb-2 text-sm">
+    {pairs.map(([label, value], j) => (
+      <div key={j}>
+        <p className="font-semibold text-gray-600">{label}</p>
+        <p className="text-black">{value}</p>
+      </div>
+    ))}
   </div>
 );
 
-
 const ComicBookCalculator = () => {
-  const [dropdowns, setDropdowns] = useState({});
-  const [bindings, setBindings] = useState([]);
   const [form, setForm] = useState({
     trim_size_id: '',
     page_count: '',
@@ -101,320 +193,377 @@ const ComicBookCalculator = () => {
     quantity: 1,
   });
   const [result, setResult] = useState(null);
-  const [loadingDropdowns, setLoadingDropdowns] = useState(true);
-  const [loadingBindings, setLoadingBindings] = useState(false);
-  const [calculating, setCalculating] = useState(false);
 
-  // Fetch dropdown data on mount
-  useEffect(() => {
-    const fetchDropdowns = async () => {
-      try {
+  // Get available bindings based on current page count
+  const availableBindings = useMemo(() => {
+    return getAvailableBindings(Number(form.page_count));
+  }, [form.page_count]);
 
-// const safeURL = `${API_BASE}api/comicbook/dropdowns/`.replace(/([^:]\/)\/+/g, "$1");
+  const stepAccessibility = useMemo(() => ({
+    trimSize: true,
+    pageCount: form.trim_size_id !== '',
+    binding: form.trim_size_id !== '' && form.page_count !== '',
+    interiorColor: form.trim_size_id !== '' && form.page_count !== '' && form.binding_id !== '',
+    paperType: form.trim_size_id !== '' && form.page_count !== '' && form.binding_id !== '' && form.interior_color_id !== '',
+    coverFinish: form.trim_size_id !== '' && form.page_count !== '' && form.binding_id !== '' && form.interior_color_id !== '' && form.paper_type_id !== ''
+  }), [form]);
 
-// console.log(API_BASE)
-// const res = await axios.get(`${API_BASE}api/calculator/dropdowns/`);
-const res = await axios.get(`${API_BASE}api/comicbook/dropdowns/`);
-console.log(API_BASE)
+  const bindingOptions = useMemo(() => ({
+    paperback: Object.entries(BINDING_RULES)
+      .filter(([, rules]) => rules.type === 'paperback')
+      .map(([name, rules]) => ({ 
+        name, 
+        img: {
+          'Perfect Bound': PerfectBoundImg,
+          'Coil Bound': CoilBoundImg,
+          'Saddle Stitch': SaddleImg,
+        }[name]
+      })),
+    hardcover: Object.entries(BINDING_RULES)
+      .filter(([, rules]) => rules.type === 'hardcover')
+      .map(([name, rules]) => ({ 
+        name, 
+        img: {
+          'Case Wrap': CaseWrap,
+          'Linen Wrap': LinenWrap,
+        }[name]
+      }))
+  }), []);
 
-        setDropdowns(res.data);
-      } catch (err) {
-        alert("Failed to load dropdowns.");
-        console.error(err);
-      } finally {
-        setLoadingDropdowns(false);
-      }
-    };
-    fetchDropdowns();
-  }, []);
+  const interiorColorOptions = INTERIOR_COLORS.map(ic => ({
+    ...ic,
+    img: {
+      'Premium Black & White': StandardBlackandWhite,
+      'Premium Color': PremiumColor
+    }[ic.name]
+  }));
 
-  // Fetch bindings when trim_size_id and page_count change
-  useEffect(() => {
-    const { trim_size_id, page_count } = form;
-    if (trim_size_id && page_count) {
-      const fetchBindings = async () => {
-        try {
-          setLoadingBindings(true);
-          const res = await axios.get(`${API_BASE}api/comicbook/bindings/`, {
-            params: { trim_size_id, page_count }
-          });
-          setBindings(res.data || []);
-        } catch (err) {
-          alert("Failed to load bindings.");
-          console.error(err);
-        } finally {
-          setLoadingBindings(false);
-        }
-      };
-      fetchBindings();
-    } else {
-      setBindings([]);
-    }
-  }, [form.trim_size_id, form.page_count]);
+  const paperTypeOptions = PAPER_TYPES.map(pt => ({
+    ...pt,
+    img: {
+      '60# Cream-Uncoated': Creamuncoated,
+      '60# White-Uncoated': Whiteuncoated,
+      '70# White-Uncoated': Whitecoatedd,
+      '80# White-Coated': Whitecoated,
+    }[pt.name]
+  }));
+
+  const coverFinishOptions = COVER_FINISHES.map(cf => ({
+    ...cf,
+    img: {
+      'Gloss': Glossy,
+      'Matte': Matty,
+    }[cf.name]
+  }));
 
   // Handle form changes
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-    let val = value;
-    if (
-      type === 'number' ||
-      ['trim_size_id', 'binding_id', 'interior_color_id', 'paper_type_id', 'cover_finish_id', 'quantity'].includes(name)
-    ) {
-      val = value === '' ? '' : Number(value);
-    }
-    setForm(prev => ({ ...prev, [name]: val }));
+    const val = type === 'number' ? (value === '' ? '' : Number(value)) : value;
+    
+    const resetFields = {
+      trim_size_id: ['page_count', 'binding_id', 'interior_color_id', 'paper_type_id', 'cover_finish_id'],
+      page_count: ['binding_id', 'interior_color_id', 'paper_type_id', 'cover_finish_id'],
+      binding_id: ['interior_color_id', 'paper_type_id', 'cover_finish_id'],
+      interior_color_id: ['paper_type_id', 'cover_finish_id'],
+      paper_type_id: ['cover_finish_id']
+    };
+    
+    setForm(prev => {
+      const newForm = { ...prev, [name]: val };
+      resetFields[name]?.forEach(field => { newForm[field] = ''; });
+      return newForm;
+    });
     setResult(null);
   };
 
-  // Handle form submission (price calculation)
-  const handleSubmit = async (e) => {
+  const handleBindingSelect = (value) => { 
+    setForm(prev => ({ 
+      ...prev, 
+      binding_id: value, 
+      interior_color_id: '', 
+      paper_type_id: '', 
+      cover_finish_id: '' 
+    })); 
+    setResult(null); 
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const { trim_size_id, page_count, binding_id, interior_color_id, paper_type_id, cover_finish_id, quantity } = form;
-    if (!trim_size_id || !page_count || !binding_id || !interior_color_id || !paper_type_id || !cover_finish_id || quantity <= 0) {
-      alert("Please fill all fields correctly.");
+    if (!form.trim_size_id || !form.page_count || !form.binding_id || !form.interior_color_id || !form.paper_type_id || !form.cover_finish_id || form.quantity <= 0) {
+      alert("Please fill in all required fields and ensure quantity is positive.");
       return;
     }
-    try {
-      setCalculating(true);
+    setResult(calculatePrice(form));
+  };
 
-const res = await axios.get(`${API_BASE}api/comicbook/dropdowns/`);
+  // Helper functions for getting display names in summary
+  const getTrimSizeName = (id) => {
+    const trimSize = COMIC_TRIM_SIZES.find(ts => ts.id === Number(id));
+    return trimSize ? trimSize.name : '-';
+  };
 
+  const getInteriorColorName = (dbName) => {
+    const interiorColor = INTERIOR_COLORS.find(ic => ic.dbName === dbName);
+    return interiorColor ? interiorColor.name : '-';
+  };
 
+  const getPaperTypeName = (dbName) => {
+    const paperType = PAPER_TYPES.find(pt => pt.dbName === dbName);
+    return paperType ? paperType.name : '-';
+  };
 
-      setResult(res.data);
-    } catch (err) {
-      alert("Calculation failed.");
-      console.error(err);
-    } finally {
-      setCalculating(false);
+  const getCoverFinishName = (dbName) => {
+    const coverFinish = COVER_FINISHES.find(cf => cf.dbName === dbName);
+    return coverFinish ? coverFinish.name : '-';
+  };
+
+  const getBindingName = (bindingName) => {
+    if (Object.keys(BINDING_RULES).includes(bindingName)) {
+      return bindingName;
     }
+    return '-';
   };
 
-  // Helper to get name by id from list
-  const getNameById = (list, id) => list?.find(opt => opt.id === id)?.name || '-';
+  // Reset binding when it becomes unavailable
+  useEffect(() => { 
+    if (form.binding_id && !availableBindings.includes(form.binding_id)) {
+      setForm(prev => ({ 
+        ...prev, 
+        binding_id: '', 
+        interior_color_id: '', 
+        paper_type_id: '', 
+        cover_finish_id: '' 
+      })); 
+    }
+  }, [availableBindings, form.binding_id]);
 
-  // Map images to exact option names (make sure keys match dropdown option names!)
-  const bindingImages = {
-    "Perfect Bound": PerfectBoundImg,
-    "Coil Bound": CoilBoundImg,
-    "Saddle Stitch": SaddleImg,
-    "Case Wrap": CaseWrap,
-    "Linen Wrap": LinenWrap,
-  };
-  const interiorColorImages = {
-    "Standard Black & White": StandardBlackandWhite,
-    "Premium Black & White": PremiumBlackandWhite,
-    "Standard Color": StandardColor,
-    "Premium Color": PremiumColor,
-  };
-  const paperTypeImages = {
-    "60# Cream-Uncoated": Creamuncoated,
-    "60# White-Uncoated": Whiteuncoated,
-    "70# White-Uncoated":Whitecoatedd ,
-    "80# White-Coated": Whitecoated,
-    "100# White-Coated": Whitecoatedd,
-  };
-  const coverFinishImages = {
-    "Gloss": Glossy,
-    "Matte": Matty,
-  };
-
-  // Extract dropdown data or default empty arrays
-  const interiorColors = dropdowns.interior_colors || [];
-  const paperTypes = dropdowns.paper_types || [];
-  const coverFinishes = dropdowns.cover_finishes || [];
-  const trimSizes = dropdowns.trim_sizes || [];
+  useEffect(() => { 
+    document.body.style.overflowX = 'hidden'; 
+    return () => { document.body.style.overflowX = 'auto'; }; 
+  }, []);
 
   return (
     <>
       <Header />
-      <PricingBanner />
+      
+   <PricingBanner/>
 
-      <div className="relative z-0">
-        <Carousel />
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
+      <Carousel />
 
-          {loadingDropdowns ? (
-            <p className="text-blue-700">Loading options...</p>
-          ) : (
-            <div className="flex w-full max-w-6xl gap-8">
-
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="flex-1 bg-white p-8 rounded-lg shadow-lg flex flex-col gap-6">
-
-                {/* Trim Size & Page Count */}
-                <div
-                  className="flex flex-col gap-4 px-4 py-4 mb-8"
-                  style={{
-                    background: 'linear-gradient(90deg, #016AB3 16.41%, #0096CD 60.03%, #00AEDC 87.93%)',
-                    border: '1px solid #E5E5E5',
-                    borderRadius: '20px',
-                  }}
+      <div className="w-full min-h-screen px-4 sm:px-6 lg:px-8 py-8 flex flex-col xl:flex-row gap-6 xl:gap-8">
+        <div className="w-full xl:w-3/5 bg-gradient-to-br from-blue-50 to-blue-100 p-4 sm:p-6 lg:p-8 rounded-2xl">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-[#2A428C]">Comic Book</h2>
+          
+          {/* Trim Size & Page Count */}
+          <div className="flex flex-col gap-4 p-4 mb-8 bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] rounded-2xl">
+            <h3 className="text-white text-lg font-semibold">Comic Book Size & Page Count</h3>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="w-full sm:w-1/2 flex flex-col">
+                <div className="h-5 mb-1"><p className="text-xs text-white opacity-90">Trim Size</p></div>
+                <select
+                  name="trim_size_id"
+                  value={form.trim_size_id}
+                  onChange={handleChange}
+                  className="h-12 w-full border px-3 py-2 rounded"
+                  required
                 >
-                  <h3 style={{ color: 'white' }} className="text-lg font-semibold">
-                    Book Size & Page Count
-                  </h3>
-
-                  <div className="flex gap-4 items-end">
-
-                    {/* Trim Size Select */}
-                    <div className="w-1/2">
-                      <label className="text-sm text-white mb-1 block">Trim Size</label>
-                      <select
-                        name="trim_size_id"
-                        value={form.trim_size_id}
-                        onChange={handleChange}
-                        className="w-full border border-gray-300 rounded p-2 h-12"
-                        style={{ backgroundColor: 'white' }}
-                        required
-                      >
-                        <option value="">Select Trim Size</option>
-                        {trimSizes.map((ts) => (
-                          <option key={ts.id} value={ts.id}>
-                            {ts.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Page Count Input */}
-                    <div className="w-1/2">
-                      <label className="text-sm text-white mb-1 block">Page Count (max 200)</label>
-                      <input
-                        type="number"
-                        name="page_count"
-                        value={form.page_count}
-                        onChange={(e) => {
-                          let val = e.target.value;
-                          if (val === '') {
-                            handleChange(e);
-                            return;
-                          }
-                          const numVal = Number(val);
-                          if (numVal > 200) {
-                            e.target.value = '200';
-                            handleChange({ ...e, target: { ...e.target, value: '200' }});
-                          } else if (numVal < 1) {
-                            e.target.value = '1';
-                            handleChange({ ...e, target: { ...e.target, value: '1' }});
-                          } else {
-                            handleChange(e);
-                          }
-                        }}
-                        min="1"
-                        max="200"
-                        className="w-full border border-gray-300 rounded p-2 h-12"
-                        style={{ backgroundColor: 'white' }}
-                        placeholder="Enter Page Count"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Binding Types */}
-                <fieldset>
-                  <legend className="font-semibold text-gray-700 mb-3">Binding Type</legend>
-                  <div className="flex flex-wrap gap-6">
-                    {Object.entries(bindingImages).map(([name, imgSrc]) => {
-                      const binding = bindings.find(b => b.name === name);
-                      const isAvailable = !!binding;
-                      const bindingId = binding?.id || null;
-
-                      return (
-                        <label
-                          key={name}
-                          className={`cursor-pointer flex flex-col items-center w-24 p-2 border rounded transition ${
-                            form.binding_id === bindingId ? 'border-blue-600 bg-blue-100' : 'border-gray-300'
-                          } ${!isAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                          <input
-                            type="radio"
-                            name="binding_id"
-                            value={bindingId || ''}
-                            disabled={!isAvailable}
-                            checked={form.binding_id === bindingId}
-                            onChange={handleChange}
-                            className="mb-2"
-                          />
-                          {imgSrc ? (
-                            <img src={imgSrc} alt={name} className="w-16 h-16 object-contain mb-1" />
-                          ) : (
-                            <div className="w-16 h-16 flex items-center justify-center text-xs text-red-500 border border-red-300 mb-1">
-                              No Image
-                            </div>
-                          )}
-                          <span className="text-center text-sm">{name}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </fieldset>
-
-                {/* Interior Color */}
-                <OptionField
-                  title="Interior Color"
-                  name="interior_color_id"
-                  options={interiorColors}
-                  images={interiorColorImages}
-                  form={form}
-                  handleChange={handleChange}
+                  <option value="">Select Trim Size</option>
+                  {COMIC_TRIM_SIZES.map((option, idx) => (
+                    <option key={idx} value={option.id}>{option.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-full sm:w-1/2 flex flex-col">
+                <div className="h-5 mb-1"><p className="text-xs text-white opacity-90">{form.trim_size_id ? 'MIN-MAX: 3 - 200' : 'Select trim size first'}</p></div>
+                <input 
+                  name="page_count" 
+                  value={form.page_count} 
+                  onChange={handleChange} 
+                  type="number" 
+                  placeholder="Enter Page Count" 
+                  min="3" 
+                  max="200" 
+                  className="h-12 w-full border px-3 py-2 rounded bg-white text-black rounded-md" 
+                  disabled={!stepAccessibility.pageCount} 
+                  required 
                 />
-
-                {/* Paper Type */}
-                <OptionField
-                  title="Paper Type"
-                  name="paper_type_id"
-                  options={paperTypes}
-                  images={paperTypeImages}
-                  form={form}
-                  handleChange={handleChange}
-                />
-
-                {/* Cover Finish */}
-                <OptionField
-                  title="Cover Finish"
-                  name="cover_finish_id"
-                  options={coverFinishes}
-                  images={coverFinishImages}
-                  form={form}
-                  handleChange={handleChange}
-                />
-
-                {/* Quantity & Estimate */}
-                <QuantityEstimateDropdown
-                  form={form}
-                  handleChange={handleChange}
-                  handleSubmit={handleSubmit}
-                  result={result}
-                  getDiscountInfo={getDiscountInfo}
-                  calculating={calculating}
-                  loadingBindings={loadingBindings}
-                />
-
-              </form>
-
-              {/* Summary Panel */}
-              <aside className="w-96 bg-white rounded-lg shadow-lg p-6 flex flex-col">
-                <img src={RightImage} alt="Book" className="w-full h-48 object-cover rounded mb-6" />
-                <h2 className="text-2xl font-bold text-blue-900 mb-4 text-center">High-Quality Comic Printing</h2>
-
-                <div className="space-y-4">
-                  <InfoRow label="Trim Size" value={getNameById(trimSizes, form.trim_size_id)} />
-                  <InfoRow label="Page Count" value={form.page_count || '-'} />
-                  <InfoRow label="Binding Type" value={getNameById(bindings, form.binding_id)} />
-                  <InfoRow label="Interior Color" value={getNameById(interiorColors, form.interior_color_id)} />
-                  <InfoRow label="Paper Type" value={getNameById(paperTypes, form.paper_type_id)} />
-                  <InfoRow label="Cover Finish" value={getNameById(coverFinishes, form.cover_finish_id)} />
-                  <InfoRow label="Quantity" value={form.quantity} />
-                  <RedirectButton />
-                </div>
-              </aside>
-
+              </div>
             </div>
-          )}
+          </div>
+
+          {/* Binding Types */}
+          <SectionTitle>Binding Types</SectionTitle>
+          
+          {/* Paperback Options */}
+          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#2A428C]">Paperback Options</h3>
+          <div className="flex gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10 flex-wrap">
+            {bindingOptions.paperback.map((item, idx) => (
+              <OptionCard 
+                key={idx} 
+                item={item} 
+                fieldName="binding_id" 
+                fieldValue={form.binding_id} 
+                onSelect={handleBindingSelect} 
+                isAvailable={availableBindings.includes(item.name)} 
+                stepAccessible={stepAccessibility.binding} 
+              />
+            ))}
+          </div>
+
+          {/* Hardcover Options */}
+          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#2A428C]">Hardcover Options</h3>
+          <div className="flex gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10 flex-wrap">
+            {bindingOptions.hardcover.map((item, idx) => (
+              <OptionCard 
+                key={idx} 
+                item={item} 
+                fieldName="binding_id" 
+                fieldValue={form.binding_id} 
+                onSelect={handleBindingSelect} 
+                isAvailable={availableBindings.includes(item.name)} 
+                stepAccessible={stepAccessibility.binding} 
+              />
+            ))}
+          </div>
+
+          {/* Interior Color */}
+          <SectionTitle>Interior Color</SectionTitle>
+          <div className="flex gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10 flex-wrap">
+            {interiorColorOptions.map((item, idx) => (
+              <OptionCard 
+                key={idx} 
+                item={item} 
+                fieldName="interior_color_id" 
+                fieldValue={form.interior_color_id} 
+                onSelect={(value) => setForm(prev => ({ ...prev, interior_color_id: value }))} 
+                isAvailable={true} 
+                stepAccessible={stepAccessibility.interiorColor} 
+                hasDbName={true} 
+              />
+            ))}
+          </div>
+
+          {/* Paper Type */}
+          <SectionTitle>Paper Type</SectionTitle>
+          <div className="flex gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10 flex-wrap">
+            {paperTypeOptions.map((item, idx) => (
+              <OptionCard 
+                key={idx} 
+                item={item} 
+                fieldName="paper_type_id" 
+                fieldValue={form.paper_type_id} 
+                onSelect={(value) => setForm(prev => ({ ...prev, paper_type_id: value }))} 
+                isAvailable={true} 
+                stepAccessible={stepAccessibility.paperType} 
+                hasDbName={true} 
+              />
+            ))}
+          </div>
+
+          {/* Cover Finish */}
+          <SectionTitle>Cover Finish</SectionTitle>
+          <div className="flex gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10 flex-wrap">
+            {coverFinishOptions.map((item, idx) => (
+              <OptionCard 
+                key={idx} 
+                item={item} 
+                fieldName="cover_finish_id" 
+                fieldValue={form.cover_finish_id} 
+                onSelect={(value) => setForm(prev => ({ ...prev, cover_finish_id: value }))} 
+                isAvailable={true} 
+                stepAccessible={stepAccessibility.coverFinish} 
+                hasDbName={true} 
+              />
+            ))}
+          </div>
+
+          {/* Quantity & Calculate */}
+          <div className="flex flex-col gap-4 p-4 bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] rounded-2xl">
+            <h3 className="text-white text-lg font-semibold">Quantity & Shipping Estimate</h3>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="w-full sm:w-1/2">
+                <p className="text-xs text-white opacity-90 mb-1">Quantity</p>
+                <input 
+                  name="quantity" 
+                  value={form.quantity} 
+                  onChange={handleChange} 
+                  type="number" 
+                  placeholder="Enter Quantity" 
+                  min="1" 
+                  className="h-12 w-full border px-3 py-2 rounded bg-white text-black rounded-md" 
+                  required
+                />
+              </div>
+              <div className="w-full sm:w-1/2 flex items-end">
+                <button onClick={handleSubmit} className="w-full h-12 bg-[#F8C20A] hover:bg-yellow-500 text-black font-semibold rounded-md transition-colors">
+                  Calculate Price
+                </button>
+              </div>
+            </div>
+            
+            {result && (
+              <div className="bg-white/20 rounded-lg p-4 text-white">
+                <h4 className="font-semibold mb-2">Pricing Results:</h4>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between"><span>Unit Price:</span><span>${result.unitPrice}</span></div>
+                  <div className="flex justify-between"><span>Total ({form.quantity} books):</span><span>${result.totalPrice}</span></div>
+                  {result.discountAmount > 0 && (
+                    <>
+                      <div className="flex justify-between text-green-200"><span>Discount ({result.discountPercent}%):</span><span>-${result.discountAmount}</span></div>
+                      <div className="flex justify-between font-semibold text-yellow-200"><span>Final Price:</span><span>${result.finalPrice}</span></div>
+                    </>
+                  )}
+                  {form.quantity >= 100 && <div className="mt-2 text-xs text-green-200">✓ Bulk discount applied! {form.quantity >= 1000 ? ' (15% off)' : form.quantity >= 500 ? ' (10% off)' : ' (5% off)'}</div>}
+                </div>
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h3 className="text-sm font-semibold text-[#2A428C] mb-2">Bulk Discount Tiers</h3>
+          <div className="space-y-1 text-xs text-gray-600">
+            <div className="flex justify-between">
+              <span>100-499 books:</span>
+              <span className={form.quantity >= 100 && form.quantity < 500 ? 'font-semibold text-green-600' : ''}>5% off</span>
+            </div>
+            <div className="flex justify-between">
+              <span>500-999 books:</span>
+              <span className={form.quantity >= 500 && form.quantity < 1000 ? 'font-semibold text-green-600' : ''}>10% off</span>
+            </div>
+            <div className="flex justify-between">
+              <span>1000+ books:</span>
+              <span className={form.quantity >= 1000 ? 'font-semibold text-green-600' : ''}>15% off</span>
+            </div>
+          </div>
+        </div>
+                <ShippingEstimate/>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Summary Panel */}
+        <div className="w-full xl:w-2/5 bg-white p-4 sm:p-6 lg:p-8 rounded-2xl shadow-lg">
+          <img src={RightImage} alt="High Quality Comic Book" className="w-full h-32 sm:h-40 lg:h-48 object-cover mb-4 rounded" />
+          <h2 className="text-lg sm:text-xl font-bold text-[#2A428C] mb-2 text-center">High-Quality Comic Book Printing</h2>
+          <div className="w-full h-0.5 bg-gray-300 mb-4"></div>
+          
+          {[
+            [['Trim Size', getTrimSizeName(form.trim_size_id)], ['Page Count', form.page_count || '-']], 
+            [['Binding Type', getBindingName(form.binding_id)], ['Interior Color', getInteriorColorName(form.interior_color_id)]], 
+            [['Paper Type', getPaperTypeName(form.paper_type_id)], ['Cover Finish', getCoverFinishName(form.cover_finish_id)]]
+          ].map((row, i) => (
+            <React.Fragment key={i}>
+              <SummaryRow pairs={row} />
+              <div className={`w-full h-px bg-gray-200 ${i === 2 ? 'my-4' : 'my-2'}`}></div>
+            </React.Fragment>
+          ))}
+          
+          <div className="flex justify-center mt-6">
+            <div className="w-full max-w-xs">
+              <RedirectButton />
+            </div>
+          </div>
         </div>
       </div>
+      
       <Footer />
     </>
   );

@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import QuantityEstimateDropdown from '../components/QuantityEstimateDropdown';
+import React, { useState, useMemo, useEffect } from 'react';
 
-import PerfectBoundImg from '../assets/images/perfectbound.png';
 import Book1 from '../assets/images/book1.png';
 import Book2 from '../assets/images/Group.png';
-import CoilBoundImg from '../assets/images/coilbound.png';
-import SaddleImg from '../assets/images/saddle.png';
-import CaseWrap from '../assets/images/casewrap.png';
-import LinenWrap from '../assets/images/linenwrap.png';
+import PerfectBoundImg from '../assets/images/img58.png';
+import CoilBoundImg from '../assets/images/coill.jpg';
+import SaddleImg from '../assets/images/saddlee.jpg';
+import CaseWrap from '../assets/images/paperbackk.jpg';
+import LinenWrap from '../assets/images/linenn.jpg';
 import StandardBlackandWhite from '../assets/images/int1.png';
 import PremiumBlackandWhite from '../assets/images/in2.png';
 import StandardColor from '../assets/images/in3.png';
@@ -17,322 +15,608 @@ import Creamuncoated from '../assets/images/pp1.jpg';
 import Whiteuncoated from '../assets/images/pp2.jpg';
 import Whitecoated from '../assets/images/pp3.jpg';
 import Whitecoatedd from '../assets/images/pp4.jpg';
-import Glossy from '../assets/images/glossy.png';
-import Matty from '../assets/images/matty.png';
+import Glossy from '../assets/images/gggg.jpg';
+import Matty from '../assets/images/mmmm.jpg';
 import RightImage from '../assets/images/right.png';
 
 import Header from '../components/Header';
 import Carousel from '../components/Carousel';
-import PricingBanner from '../components/PricingBanner';
-import Footer from '../components/Footer';
 import RedirectButton from '../components/RedirectButton';
-import { BASE_URL } from '../services/baseURL';
+import Footer from '../components/Footer';
+import ShippingEstimate from '../components/ShippingEstimate.';
+import PricingBanner from '../components/PricingBanner';
 
-const API_BASE = `${BASE_URL}`;
-const getDiscountInfo = (qty) => {
-  if (qty >= 1000) return { percent: 15, price: 17.93 };
-  if (qty >= 500) return { percent: 10, price: 18.98 };
-  if (qty >= 100) return { percent: 5, price: 20.04 };
-  return null;
+const BOOK_SIZES = [
+  'Pocket Book (4.25 x 6.875 in / 108 x 175 mm)',
+  'Novella (5 x 8 in / 127 x 203 mm)',
+  'Digest (5.5 x 8.5 in / 140 x 216 mm)',
+  'A5 (5.83 x 8.27 in / 148 x 210 mm)',
+  'US Trade (6 x 9 in / 152 x 229 mm)',
+  'Royal (6.14 x 9.21 in / 156 x 234 mm)',
+  'Executive (7 x 10 in / 178 x 254 mm)',
+  'Crown Quarto (7.44 x 9.68 in / 189 x 246 mm)',
+  'Small Square (7.5 x 7.5 in / 190 x 190 mm)',
+  'A4 (8.27 x 11.69 in / 210 x 297 mm)',
+  'Square (8.5 x 8.5 in / 216 x 216 mm)',
+  'US Letter (8.5 x 11 in / 216 x 279 mm)',
+  'Small Landscape (9 x 7 in / 229 x 178 mm)',
+  'US Letter Landscape (11 x 8.5 in / 279 x 216 mm)',
+  'A4 Landscape (11.69 x 8.27 in / 297 x 210 mm)'
+];
+
+const BINDING_RULES = {
+  'Coil Bound': { minPages: 3, maxPages: 470, img: CoilBoundImg, type: 'paperback' },
+  'Saddle Stitch': { minPages: 4, maxPages: 48, img: SaddleImg, type: 'paperback' },
+  'Perfect Bound': { minPages: 32, maxPages: 800, img: PerfectBoundImg, type: 'paperback' },
+  'Case Wrap': { minPages: 24, maxPages: 800, img: CaseWrap, type: 'hardcover' },
+  'Linen Wrap': { minPages: 32, maxPages: 800, img: LinenWrap, type: 'hardcover' }
 };
 
-const OptionField = ({ title, name, options, images, form, handleChange }) => {
-  // Remove duplicates based on option name
-  const uniqueOptions = Array.from(
-    new Map(options.map(opt => [opt.name, opt])).values()
-  );
+const SPECIAL_SIZE_RULES = {
+  'Small Landscape (9 x 7 in / 229 x 178 mm)': { 'Saddle Stitch': { minPages: 4, maxPages: 48 } },
+  'US Letter Landscape (11 x 8.5 in / 279 x 216 mm)': { 'Perfect Bound': { minPages: 32, maxPages: 250 } },
+  'A4 Landscape (11.69 x 8.27 in / 297 x 210 mm)': {
+    'Perfect Bound': { minPages: 32, maxPages: 250 },
+    'Saddle Stitch': { minPages: 4, maxPages: 48 }
+  }
+};
 
-  const handleOptionClick = (optionId) => {
-    // Create a synthetic event object
-    const syntheticEvent = {
-      target: {
-        name: name,
-        value: optionId,
-        type: 'radio'
-      }
-    };
-    handleChange(syntheticEvent);
+const OPTIONS_CONFIG = {
+  interiorColor: [
+    { name: 'Standard Black and White', img: StandardBlackandWhite, dbName: 'Standard Black & White' },
+    { name: 'Premium Black and White', img: PremiumBlackandWhite, dbName: 'Premium Black & White' },
+    { name: 'Standard Color', img: StandardColor, dbName: 'Standard Color' },
+    { name: 'Premium Color', img: PremiumColor, dbName: 'Premium Color' }
+  ],
+  paperType: [
+    { name: "60# Cream Uncoated", img: Creamuncoated, dbName: "60# Cream-Uncoated" },
+    { name: "60# White Uncoated", img: Whiteuncoated, dbName: "60# White-Uncoated" },
+    { name: "80# White Coated", img: Whitecoated, dbName: "80# White-Coated" },
+    { name: "100# White Coated", img: Whitecoatedd, dbName: "100# White-Coated" }
+  ],
+  coverFinish: [
+    { name: "Glossy", img: Glossy, dbName: "Gloss" },
+    { name: "Matte", img: Matty, dbName: "Matte" }
+  ]
+};
+
+const createPricing = (b, ic, pt, cf) => ({ binding: b, interiorColor: ic, paperType: pt, coverFinish: cf });
+
+const SIZE_SPECIFIC_PRICING = {
+  'Pocket Book (4.25 x 6.875 in / 108 x 175 mm)': createPricing(
+    { 'Perfect Bound': 1.91, 'Saddle Stitch': 3.59, 'Case Wrap': 9.86, 'Linen Wrap': 6.00, 'Coil Bound': 5.90 },
+    { 'Standard Black & White': 0.01, 'Premium Black & White': 0.02, 'Standard Color': 0.03, 'Premium Color': 0.04 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.02, '100# White-Coated': 0.02 },
+    { 'Gloss': 0.10, 'Matte': 0.10 }
+  ),
+  'Novella (5 x 8 in / 127 x 203 mm)': createPricing(
+    { 'Perfect Bound': 1.97, 'Saddle Stitch': 3.50, 'Case Wrap': 9.80, 'Linen Wrap': 0, 'Coil Bound': 5.76 },
+    { 'Standard Black & White': 0.01, 'Premium Black & White': 0.02, 'Standard Color': 0.03, 'Premium Color': 0.10 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.02, '100# White-Coated': 0.02 },
+    { 'Gloss': 0, 'Matte': 0 }
+  ),
+  'Digest (5.5 x 8.5 in / 140 x 216 mm)': createPricing(
+    { 'Perfect Bound': 1.90, 'Saddle Stitch': 3.50, 'Case Wrap': 9.80, 'Linen Wrap': 13.75, 'Coil Bound': 5.95 },
+    { 'Standard Black & White': 0.01, 'Premium Black & White': 0.02, 'Standard Color': 0.03, 'Premium Color': 0.10 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.02, '100# White-Coated': 0.02 },
+    { 'Gloss': 0, 'Matte': 0 }
+  ),
+  'A5 (5.83 x 8.27 in / 148 x 210 mm)': createPricing(
+    { 'Perfect Bound': 1.90, 'Saddle Stitch': 3.46, 'Case Wrap': 9.80, 'Linen Wrap': 13.75, 'Coil Bound': 5.80 },
+    { 'Standard Black & White': 0.01, 'Premium Black & White': 0.02, 'Standard Color': 0.03, 'Premium Color': 0.10 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.02, '100# White-Coated': 0.02 },
+    { 'Gloss': 0, 'Matte': 0 }
+  ),
+  'US Trade (6 x 9 in / 152 x 229 mm)': createPricing(
+    { 'Perfect Bound': 1.71, 'Saddle Stitch': 3.46, 'Case Wrap': 9.96, 'Linen Wrap': 13.50, 'Coil Bound': 5.96 },
+    { 'Standard Black & White': 0.01, 'Premium Black & White': 0.02, 'Standard Color': 0.03, 'Premium Color': 0.10 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.02, '100# White-Coated': 0.02 },
+    { 'Gloss': 0, 'Matte': 0 }
+  ),
+  'Royal (6.14 x 9.21 in / 156 x 234 mm)': createPricing(
+    { 'Perfect Bound': 1.71, 'Saddle Stitch': 3.46, 'Case Wrap': 9.96, 'Linen Wrap': 13.50, 'Coil Bound': 5.96 },
+    { 'Standard Black & White': 0.01, 'Premium Black & White': 0.02, 'Standard Color': 0.03, 'Premium Color': 0.10 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.02, '100# White-Coated': 0.02 },
+    { 'Gloss': 0.20, 'Matte': 0.20 }
+  ),
+  'Executive (7 x 10 in / 178 x 254 mm)': createPricing(
+    { 'Perfect Bound': 2.00, 'Saddle Stitch': 4.10, 'Case Wrap': 10.00, 'Linen Wrap': 13.95, 'Coil Bound': 6.40 },
+    { 'Standard Black & White': 0.02, 'Premium Black & White': 0.03, 'Standard Color': 0.04, 'Premium Color': 0.16 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.02, '100# White-Coated': 0.02 },
+    { 'Gloss': 0, 'Matte': 0 }
+  ),
+  'Crown Quarto (7.44 x 9.68 in / 189 x 246 mm)': createPricing(
+    { 'Perfect Bound': 2.00, 'Saddle Stitch': 4.10, 'Case Wrap': 10.00, 'Linen Wrap': 13.95, 'Coil Bound': 6.40 },
+    { 'Standard Black & White': 0.02, 'Premium Black & White': 0.03, 'Standard Color': 0.04, 'Premium Color': 0.16 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.02, '100# White-Coated': 0.02 },
+    { 'Gloss': 0.05, 'Matte': 0.05 }
+  ),
+  'Small Square (7.5 x 7.5 in / 190 x 190 mm)': createPricing(
+    { 'Perfect Bound': 2.00, 'Saddle Stitch': 4.10, 'Case Wrap': 10.00, 'Linen Wrap': 13.50, 'Coil Bound': 6.40 },
+    { 'Standard Black & White': 0.02, 'Premium Black & White': 0.03, 'Standard Color': 0.04, 'Premium Color': 0.16 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.03, '100# White-Coated': 0.03 },
+    { 'Gloss': 0, 'Matte': 0 }
+  ),
+  'A4 (8.27 x 11.69 in / 210 x 297 mm)': createPricing(
+    { 'Perfect Bound': 2.10, 'Saddle Stitch': 3.82, 'Case Wrap': 9.75, 'Linen Wrap': 13.80, 'Coil Bound': 6.18 },
+    { 'Standard Black & White': 0.02, 'Premium Black & White': 0.03, 'Standard Color': 0.04, 'Premium Color': 0.16 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.03, '100# White-Coated': 0.03 },
+    { 'Gloss': 0.20, 'Matte': 0.20 }
+  ),
+  'Square (8.5 x 8.5 in / 216 x 216 mm)': createPricing(
+    { 'Perfect Bound': 2.00, 'Saddle Stitch': 3.82, 'Case Wrap': 9.75, 'Linen Wrap': 13.80, 'Coil Bound': 6.18 },
+    { 'Standard Black & White': 0.02, 'Premium Black & White': 0.03, 'Standard Color': 0.04, 'Premium Color': 0.16 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.03, '100# White-Coated': 0.03 },
+    { 'Gloss': 0.20, 'Matte': 0.20 }
+  ),
+  'US Letter (8.5 x 11 in / 216 x 279 mm)': createPricing(
+    { 'Perfect Bound': 2.00, 'Saddle Stitch': 3.82, 'Case Wrap': 9.75, 'Linen Wrap': 13.80, 'Coil Bound': 6.18 },
+    { 'Standard Black & White': 0.02, 'Premium Black & White': 0.03, 'Standard Color': 0.04, 'Premium Color': 0.16 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.03, '100# White-Coated': 0.03 },
+    { 'Gloss': 0.20, 'Matte': 0.20 }
+  ),
+  'Small Landscape (9 x 7 in / 229 x 178 mm)': createPricing(
+    { 'Perfect Bound': 2.00, 'Saddle Stitch': 3.82, 'Case Wrap': 9.75, 'Linen Wrap': 13.80, 'Coil Bound': 6.18 },
+    { 'Standard Black & White': 0.02, 'Premium Black & White': 0.03, 'Standard Color': 0.04, 'Premium Color': 0.16 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.03, '100# White-Coated': 0.03 },
+    { 'Gloss': 0.20, 'Matte': 0.20 }
+  ),
+  'US Letter Landscape (11 x 8.5 in / 279 x 216 mm)': createPricing(
+    { 'Perfect Bound': 2.00, 'Saddle Stitch': 3.82, 'Case Wrap': 9.75, 'Linen Wrap': 18.00, 'Coil Bound': 6.22 },
+    { 'Standard Black & White': 0.02, 'Premium Black & White': 0.03, 'Standard Color': 0.04, 'Premium Color': 0.16 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.03, '100# White-Coated': 0.03 },
+    { 'Gloss': 0.10, 'Matte': 0.10 }
+  ),
+  'A4 Landscape (11.69 x 8.27 in / 297 x 210 mm)': createPricing(
+    { 'Perfect Bound': 2.00, 'Saddle Stitch': 5.00, 'Case Wrap': 9.75, 'Linen Wrap': 13.80, 'Coil Bound': 6.18 },
+    { 'Standard Black & White': 0.02, 'Premium Black & White': 0.03, 'Standard Color': 0.04, 'Premium Color': 0.16 },
+    { '60# Cream-Uncoated': 0.01, '60# White-Uncoated': 0.01, '80# White-Coated': 0.03, '100# White-Coated': 0.03 },
+    { 'Gloss': 0.10, 'Matte': 0.10 }
+  )
+};
+
+const DISCOUNTS = [
+  { min: 1000, percent: 15 },
+  { min: 500, percent: 10 },
+  { min: 100, percent: 5 }
+];
+
+const getAvailableBindings = (pageCount, bookSize) => {
+  if (!pageCount || pageCount < 2) return [];
+  const specialRules = SPECIAL_SIZE_RULES[bookSize];
+  return Object.entries(BINDING_RULES).reduce((acc, [bindingName, generalRule]) => {
+    const rule = specialRules?.[bindingName] || generalRule;
+    if (pageCount >= rule.minPages && pageCount <= rule.maxPages) acc.push(bindingName);
+    return acc;
+  }, []);
+};
+
+const calculatePrice = (formData) => {
+  const { bookSize, page_count, binding_id, interior_color_id, paper_type_id, cover_finish_id, quantity } = formData;
+  if (!bookSize || !page_count || !binding_id || !interior_color_id || !paper_type_id || !cover_finish_id) return null;
+  const sizePricing = SIZE_SPECIFIC_PRICING[bookSize];
+  if (!sizePricing) return null;
+  const unitPrice =
+    (sizePricing.binding[binding_id] || 0) +
+    ((sizePricing.interiorColor[interior_color_id] || 0) * page_count) +
+    ((sizePricing.paperType[paper_type_id] || 0) * page_count) +
+    (sizePricing.coverFinish[cover_finish_id] || 0);
+  const totalPrice = unitPrice * quantity;
+  const discount = DISCOUNTS.find((d) => quantity >= d.min);
+  const discountAmount = discount ? totalPrice * (discount.percent / 100) : 0;
+  return {
+    unitPrice: unitPrice.toFixed(2),
+    totalPrice: totalPrice.toFixed(2),
+    discount: discountAmount.toFixed(2),
+    discountPercent: discount?.percent || 0,
+    finalPrice: (totalPrice - discountAmount).toFixed(2)
   };
+};
 
+const OptionCard = ({ item, fieldName, fieldValue, onSelect, isAvailable, stepAccessible, hasDbName = false }) => {
+  const canSelect = isAvailable && stepAccessible;
+  const opacity = !stepAccessible ? 0.3 : !isAvailable ? 0.5 : 1;
+  const value = hasDbName ? item.dbName : item.name;
   return (
-    <fieldset>
-      <legend className="font-semibold text-gray-700 mb-3">{title}</legend>
-      <div className="flex flex-wrap gap-6">
-        {uniqueOptions.map(opt => (
-          <label
-            key={opt.id}
-            className={`cursor-pointer flex flex-col items-center w-24 p-2 border-2 rounded transition-all duration-200 ${
-              form[name] === opt.id 
-                ? 'border-blue-600 bg-blue-50 shadow-md' 
-                : 'border-gray-300 hover:border-blue-300 hover:bg-gray-50'
-            }`}
-            onClick={() => handleOptionClick(opt.id)}
-          >
-            <input
-              type="radio"
-              name={name}
-              value={opt.id}
-              checked={form[name] === opt.id}
-              onChange={() => {}} // Controlled by label click
-              className="mb-2 accent-blue-600"
-              style={{ display: 'none' }} // Hide the default radio button
-            />
-            {/* Custom radio button indicator */}
-            <div className={`w-4 h-4 rounded-full border-2 mb-2 flex items-center justify-center ${
-              form[name] === opt.id 
-                ? 'border-blue-600 bg-blue-600' 
-                : 'border-gray-400'
-            }`}>
-              {form[name] === opt.id && (
-                <div className="w-2 h-2 rounded-full bg-white"></div>
-              )}
-            </div>
-            {images[opt.name] && (
-              <img src={images[opt.name]} alt={opt.name} className="w-16 h-16 object-contain mb-1" />
-            )}
-            <span className={`text-center text-sm ${
-              form[name] === opt.id ? 'text-blue-700 font-semibold' : 'text-gray-700'
-            }`}>
-              {opt.name}
-            </span>
-          </label>
-        ))}
+    <label
+      className={`flex flex-col items-center cursor-pointer relative w-20 sm:w-24 ${
+        !canSelect ? 'cursor-not-allowed' : ''
+      }`}
+      style={{ opacity }}
+    >
+      <div className="relative w-full">
+        <input
+          type="radio"
+          name={fieldName}
+          value={value}
+          checked={fieldValue === value}
+          onChange={() => canSelect && onSelect(value)}
+          disabled={!canSelect}
+          className="absolute top-1 left-1 z-10 w-3 h-3"
+        />
+        <img src={item.img} alt={item.name} className="w-full h-auto object-contain mb-2 mt-3 rounded" />
       </div>
-    </fieldset>
+      <p className="text-xs sm:text-sm text-[#2A428C] text-center px-1">{item.name}</p>
+    </label>
   );
 };
 
-const InfoRow = ({ label, value }) => (
-  <div className="flex justify-between border-b border-gray-200 pb-2 mb-2">
-    <span className="font-semibold text-gray-700">{label}:</span>
-    <span className="text-gray-600 font-medium">{value}</span>
+const SectionTitle = ({ children }) => (
+  <>
+    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 text-[#2A428C]">{children}</h2>
+    <div className="w-full h-0.5 bg-gray-200 mb-4 sm:mb-6"></div>
+  </>
+);
+
+const OptionSection = ({ title, options, fieldName, fieldValue, onSelect, isAvailable, stepAccessible, hasDbName = false }) => (
+  <>
+    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#2A428C]">{title}</h3>
+    <div className="flex gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10 flex-wrap">
+      {options.map((item, idx) => (
+        <OptionCard
+          key={idx}
+          item={item}
+          fieldName={fieldName}
+          fieldValue={fieldValue}
+          onSelect={onSelect}
+          isAvailable={typeof isAvailable === 'function' ? isAvailable(item) : isAvailable}
+          stepAccessible={stepAccessible}
+          hasDbName={hasDbName}
+        />
+      ))}
+    </div>
+  </>
+);
+
+const FormSelect = ({ name, value, onChange, options, placeholder, className = '' }) => (
+  <select
+    name={name}
+    value={value}
+    onChange={onChange}
+    className={`w-full border px-3 py-2 rounded ${className}`}
+    required
+  >
+    <option value="">{placeholder}</option>
+    {options.map((option, idx) => (
+      <option key={idx} value={option}>
+        {option}
+      </option>
+    ))}
+  </select>
+);
+
+const FormInput = ({ type = 'text', name, value, onChange, placeholder, className = '', disabled = false, ...props }) => (
+  <input
+    type={type}
+    name={name}
+    value={value}
+    onChange={onChange}
+    placeholder={placeholder}
+    className={`w-full border px-3 py-2 rounded ${className}`}
+    disabled={disabled}
+    required
+    {...props}
+  />
+);
+
+const SummaryRow = ({ pairs }) => (
+  <div className="flex justify-between mb-2 text-sm">
+    {pairs.map(([label, value], j) => (
+      <div key={j}>
+        <p className="font-semibold text-gray-600">{label}</p>
+        <p className="text-black">{value}</p>
+      </div>
+    ))}
   </div>
 );
 
 const PhotoBookCalculator = () => {
-  const [dropdowns, setDropdowns] = useState({});
   const [form, setForm] = useState({
-    trim_size_id: '',
+    bookSize: '',
     page_count: '',
     binding_id: '',
     interior_color_id: '',
     paper_type_id: '',
     cover_finish_id: '',
-    spine_id: '',
-    exterior_color_id: '',
-    foil_stamping_id: '',
-    screen_stamping_id: '',
     quantity: 1,
   });
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [calculating, setCalculating] = useState(false);
 
-  useEffect(() => {
-    const fetchDropdowns = async () => {
-      try {
-        const res = await axios.get(`${API_BASE}api/photobook/dropdowns/`);
-        setDropdowns(res.data);
-        console.log('Dropdowns loaded:', res.data); // Debug log
-      } catch (err) {
-        alert("Failed to load dropdowns.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDropdowns();
-  }, []);
+  const [result, setResult] = useState(null);
+
+  const availableBindings = useMemo(() => getAvailableBindings(Number(form.page_count), form.bookSize), [form.page_count, form.bookSize]);
+
+  const stepAccessibility = useMemo(
+    () => ({
+      bookSize: true,
+      pageCount: form.bookSize !== '',
+      binding: form.bookSize !== '' && form.page_count !== '',
+      interiorColor: form.bookSize !== '' && form.page_count !== '' && form.binding_id !== '',
+      paperType:
+        form.bookSize !== '' &&
+        form.page_count !== '' &&
+        form.binding_id !== '' &&
+        form.interior_color_id !== '',
+      coverFinish:
+        form.bookSize !== '' &&
+        form.page_count !== '' &&
+        form.binding_id !== '' &&
+        form.interior_color_id !== '' &&
+        form.paper_type_id !== ''
+    }),
+    [form]
+  );
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-    let val = value;
-    
-    // Convert to number for specific fields that expect numeric IDs
-    if (type === 'number') {
-      val = value === '' ? '' : Number(value);
-    } else if (name.includes('_id') && value !== '') {
-      // Convert ID fields to numbers to match the dropdown option IDs
-      val = Number(value);
-    }
-    
-    console.log(`Updating ${name} to:`, val, 'Type:', typeof val); // Debug log
-    
-    setForm(prev => {
-      const newForm = { ...prev, [name]: val };
-      console.log('New form state:', newForm); // Debug log
+    const val = type === 'number' ? (value === '' ? '' : Number(value)) : value;
+    const resetFields = {
+      bookSize: ['page_count', 'binding_id', 'interior_color_id', 'paper_type_id', 'cover_finish_id'],
+      page_count: ['binding_id', 'interior_color_id', 'paper_type_id', 'cover_finish_id'],
+      binding_id: ['interior_color_id', 'paper_type_id', 'cover_finish_id'],
+      interior_color_id: ['paper_type_id', 'cover_finish_id'],
+      paper_type_id: ['cover_finish_id'],
+    };
+    setForm((prev) => {
+      const newForm = {...prev, [name]: val };
+      resetFields[name]?.forEach(field => {
+        newForm[field] = '';
+      });
       return newForm;
     });
     setResult(null);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setCalculating(true);
-      const res = await axios.post(`${API_BASE}api/photobook/calculate/`, form);
-      setResult(res.data);
-    } catch (err) {
-      alert("Calculation failed.");
-      console.error(err);
-    } finally {
-      setCalculating(false);
+  const handleBindingSelect = (value) => {
+    setForm((prev) => ({ ...prev, binding_id: value, interior_color_id: '', paper_type_id: '', cover_finish_id: '' }));
+    setResult(null);
+  };
+
+  useEffect(() => {
+    if (form.binding_id && !availableBindings.includes(form.binding_id)) {
+      setForm((prev) => ({
+        ...prev,
+        binding_id: '',
+        interior_color_id: '',
+        paper_type_id: '',
+        cover_finish_id: '',
+      }));
     }
+  }, [availableBindings, form.binding_id]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (
+      !form.bookSize ||
+      !form.page_count ||
+      !form.binding_id ||
+      !form.interior_color_id ||
+      !form.paper_type_id ||
+      !form.cover_finish_id ||
+      form.quantity <= 0
+    ) {
+      alert('Please fill in all required fields and ensure quantity is positive.');
+      return;
+    }
+    setResult(calculatePrice(form));
   };
 
-  const getNameById = (list, id) => {
-    if (!list || !id) return '-';
-    const found = list.find(opt => opt.id === id);
-    return found ? found.name : '-';
-  };
+  // Group binding types by paperback and hardcover
+  const paperbackBindings = Object.entries(BINDING_RULES)
+    .filter(([, rule]) => rule.type === 'paperback')
+    .map(([name, rule]) => ({ name, img: rule.img }));
 
-  const bindingImages = {
-    "Perfect Bound": PerfectBoundImg,
-    "Coil Bound": CoilBoundImg,
-    "Saddle Stitch": SaddleImg,
-    "Case Wrap": CaseWrap,
-    "Linen Wrap": LinenWrap,
-  };
-  const interiorColorImages = {
-    "Standard Black & White": StandardBlackandWhite,
-    "Premium Black & White": PremiumBlackandWhite,
-    "Standard Color": StandardColor,
-    "Premium Color": PremiumColor,
-  };
-  const paperTypeImages = {
-    "60# Cream-Uncoated": Creamuncoated,
-    "60# White-Uncoated": Whiteuncoated,
-    "80# White-Coated": Whitecoated,
-    "100# White-Coated": Whitecoatedd,
-  };
-  const coverFinishImages = {
-    "Gloss": Glossy,
-    "Matte": Matty,
-  };
-
-  const interiorColors = dropdowns.interior_colors || [];
-  const paperTypes = dropdowns.paper_types || [];
-  const coverFinishes = dropdowns.cover_finishes || [];
-  const trimSizes = dropdowns.trim_sizes || [];
-  const bindings = dropdowns.bindings || [];
+  const hardcoverBindings = Object.entries(BINDING_RULES)
+    .filter(([, rule]) => rule.type === 'hardcover')
+    .map(([name, rule]) => ({ name, img: rule.img }));
 
   return (
     <>
       <Header />
-      <PricingBanner />
+      <PricingBanner/>
       <Carousel />
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-blue-700 text-lg">Loading options...</div>
-          </div>
-        ) : (
-          <div className="flex w-full max-w-6xl gap-8">
-            <form onSubmit={handleSubmit} className="flex-1 bg-white p-8 rounded-lg shadow-lg flex flex-col gap-6">
-              <div className="flex flex-col gap-4 px-4 py-4 mb-8" style={{ background: 'linear-gradient(90deg, #016AB3 16.41%, #0096CD 60.03%, #00AEDC 87.93%)', border: '1px solid #E5E5E5', borderRadius: '20px' }}>
-                <h3 style={{ color: 'white' }} className="text-lg font-semibold">Book Size & Page Count</h3>
-                <div className="flex gap-4 items-end">
-                  <div className="w-1/2">
-                    <label className="text-sm text-white mb-1 block">Trim Size</label>
-                    <select 
-                      name="trim_size_id" 
-                      value={form.trim_size_id} 
-                      onChange={handleChange} 
-                      className="w-full border border-gray-300 rounded p-2 h-12" 
-                      style={{ backgroundColor: 'white' }} 
-                      required
-                    >
-                      <option value="">Select Trim Size</option>
-                      {trimSizes.map((ts) => (
-                        <option key={ts.id} value={ts.id}>{ts.name}</option>
-                      ))}
-                    </select>
+      <div className="w-full min-h-screen px-4 sm:px-6 lg:px-8 py-8 flex flex-col xl:flex-row gap-6 xl:gap-8">
+        <div className="w-full xl:w-3/5 bg-gradient-to-br from-blue-50 to-blue-100 p-4 sm:p-6 lg:p-8 rounded-2xl">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-[#2A428C]">Photo Book</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="flex flex-col gap-4 p-4 mb-8 bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00AEDC] rounded-2xl">
+              <h3 className="text-white text-lg font-semibold">Book Size & Page Count</h3>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="w-full sm:w-1/2 flex flex-col">
+                  <div className="h-5 mb-1">
+                    <p className="text-xs text-white opacity-90">Book Size</p>
                   </div>
-                  <div className="w-1/2">
-                    <label className="text-sm text-white mb-1 block">Page Count (max 200)</label>
-                    <input 
-                      type="number" 
-                      name="page_count" 
-                      value={form.page_count} 
-                      onChange={handleChange} 
-                      min="1" 
-                      max="200" 
-                      className="w-full border border-gray-300 rounded p-2 h-12" 
-                      style={{ backgroundColor: 'white' }} 
-                      placeholder="Enter Page Count" 
-                      required 
-                    />
+                  <FormSelect name="bookSize" value={form.bookSize} onChange={handleChange} options={BOOK_SIZES} placeholder="Select Book Size" className="h-12" />
+                </div>
+                <div className="w-full sm:w-1/2 flex flex-col">
+                  <div className="h-5 mb-1">
+                    <p className="text-xs text-white opacity-90">{form.bookSize ? 'MIN-MAX: 2 - 800' : 'Select book size first'}</p>
                   </div>
+                  <FormInput
+                    name="page_count"
+                    value={form.page_count}
+                    onChange={handleChange}
+                    type="number"
+                    placeholder="Enter Page Count"
+                    min="2"
+                    max="800"
+                    className="h-12 bg-white text-black rounded-md"
+                    disabled={!stepAccessibility.pageCount}
+                  />
                 </div>
               </div>
-              
-              <OptionField 
-                title="Binding Type" 
-                name="binding_id" 
-                options={bindings} 
-                images={bindingImages} 
-                form={form} 
-                handleChange={handleChange} 
-              />
-              
-              <OptionField 
-                title="Interior Color" 
-                name="interior_color_id" 
-                options={interiorColors} 
-                images={interiorColorImages} 
-                form={form} 
-                handleChange={handleChange} 
-              />
-              
-              <OptionField 
-                title="Paper Type" 
-                name="paper_type_id" 
-                options={paperTypes} 
-                images={paperTypeImages} 
-                form={form} 
-                handleChange={handleChange} 
-              />
-              
-              <OptionField 
-                title="Cover Finish" 
-                name="cover_finish_id" 
-                options={coverFinishes} 
-                images={coverFinishImages} 
-                form={form} 
-                handleChange={handleChange} 
-              />
-              
-              <QuantityEstimateDropdown
-                form={form}
-                handleChange={handleChange}
-                handleSubmit={handleSubmit}
-                result={result}
-                getDiscountInfo={getDiscountInfo}
-                calculating={calculating}
-                loading={loading}
-              />
-            </form>
+            </div>
+
+            <SectionTitle>Binding Types</SectionTitle>
             
-            <aside className="w-96 bg-white rounded-lg shadow-lg p-6 flex flex-col">
-              <img src={RightImage} alt="Book" className="w-full h-48 object-cover rounded mb-6" />
-              <h2 className="text-2xl font-bold text-blue-900 mb-6 text-center">High-Quality Photo Printing</h2>
-              
-              <div className="space-y-3 flex-grow">
-                <InfoRow label="Trim Size" value={getNameById(trimSizes, form.trim_size_id)} />
-                <InfoRow label="Page Count" value={form.page_count || '-'} />
-                <InfoRow label="Binding Type" value={getNameById(bindings, form.binding_id)} />
-                <InfoRow label="Interior Color" value={getNameById(interiorColors, form.interior_color_id)} />
-                <InfoRow label="Paper Type" value={getNameById(paperTypes, form.paper_type_id)} />
-                <InfoRow label="Cover Finish" value={getNameById(coverFinishes, form.cover_finish_id)} />
-                <InfoRow label="Quantity" value={form.quantity || '-'} />
-                
-                <div className="pt-4 border-t border-gray-200">
-                  <RedirectButton />
+            {/* Paperback Options */}
+            <OptionSection
+              title="Paperback Options"
+              options={paperbackBindings}
+              fieldName="binding_id"
+              fieldValue={form.binding_id}
+              onSelect={handleBindingSelect}
+              isAvailable={(item) => availableBindings.includes(item.name)}
+              stepAccessible={stepAccessibility.binding}
+            />
+
+            {/* Hardcover Options */}
+            <OptionSection
+              title="Hardcover Options"
+              options={hardcoverBindings}
+              fieldName="binding_id"
+              fieldValue={form.binding_id}
+              onSelect={handleBindingSelect}
+              isAvailable={(item) => availableBindings.includes(item.name)}
+              stepAccessible={stepAccessibility.binding}
+            />
+
+            <SectionTitle>Interior Color</SectionTitle>
+            <OptionSection
+          
+              options={OPTIONS_CONFIG.interiorColor}
+              fieldName="interior_color_id"
+              fieldValue={form.interior_color_id}
+              onSelect={(value) => setForm((prev) => ({ ...prev, interior_color_id: value }))}
+              isAvailable={(item) => SIZE_SPECIFIC_PRICING[form.bookSize]?.interiorColor[item.dbName] !== undefined}
+              stepAccessible={stepAccessibility.interiorColor}
+              hasDbName={true}
+            />
+
+            <SectionTitle>Paper Type</SectionTitle>
+            <OptionSection
+              options={OPTIONS_CONFIG.paperType}
+              fieldName="paper_type_id"
+              fieldValue={form.paper_type_id}
+              onSelect={(value) => setForm((prev) => ({ ...prev, paper_type_id: value }))}
+              isAvailable={(item) => SIZE_SPECIFIC_PRICING[form.bookSize]?.paperType[item.dbName] !== undefined}
+              stepAccessible={stepAccessibility.paperType}
+              hasDbName={true}
+            />
+
+            <SectionTitle>Cover Finish</SectionTitle>
+            <OptionSection
+          
+              options={OPTIONS_CONFIG.coverFinish}
+              fieldName="cover_finish_id"
+              fieldValue={form.cover_finish_id}
+              onSelect={(value) => setForm((prev) => ({ ...prev, cover_finish_id: value }))}
+              isAvailable={(item) => SIZE_SPECIFIC_PRICING[form.bookSize]?.coverFinish[item.dbName] !== undefined}
+              stepAccessible={stepAccessibility.coverFinish}
+              hasDbName={true}
+            />
+
+            <div className="flex flex-col gap-4 p-4 bg-gradient-to-r from-[#016AB3] via-[#0096CD] to-[#00aedc] rounded-2xl">
+              <h3 className="text-white text-lg font-semibold">Quantity & Shipping Estimate</h3>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="w-full sm:w-1/2">
+                  <p className="text-xs text-white opacity-90 mb-1">Quantity</p>
+                  <FormInput
+                    name="quantity"
+                    value={form.quantity}
+                    onChange={handleChange}
+                    type="number"
+                    placeholder="Enter Quantity"
+                    min="1"
+                    className="h-12 bg-white text-black rounded-md"
+                  />
+                </div>
+                <div className="w-full sm:w-1/2 flex items-end">
+                  <button
+                    type="submit"
+                    className="w-full h-12 bg-[#F8C20A] hover:bg-yellow-500 text-black font-semibold rounded-md transition-colors"
+                  >
+                    Calculate Price
+                  </button>
                 </div>
               </div>
-            </aside>
+
+              {result && (
+                <div className="bg-white/20 rounded-lg p-4 text-white">
+                  <h4 className="font-semibold mb-2">Pricing Results:</h4>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span>Unit Price:</span>
+                      <span>${result.unitPrice}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total ({form.quantity} books):</span>
+                      <span>${result.totalPrice}</span>
+                    </div>
+                    {result.discount > 0 && (
+                      <>
+                        <div className="flex justify-between text-green-200">
+                          <span>Discount ({result.discountPercent}%):</span>
+                          <span>-${result.discount}</span>
+                        </div>
+                        <div className="flex justify-between font-semibold text-yellow-200">
+                          <span>Final Price:</span>
+                          <span>${result.finalPrice}</span>
+                        </div>
+                      </>
+                    )}
+                    {form.quantity >= 100 && (
+                      <div className="mt-2 text-xs text-green-200">
+                        ✓ Bulk discount applied!{' '}
+                        {form.quantity >= 1000
+                          ? ' (15% off)'
+                          : form.quantity >= 500
+                          ? ' (10% off)'
+                          : ' (5% off)'}
+                      </div>
+                    )}
+                  </div>
+                    <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h3 className="text-sm font-semibold text-[#2A428C] mb-2">Bulk Discount Tiers</h3>
+          <div className="space-y-1 text-xs text-gray-600">
+            <div className="flex justify-between">
+              <span>100-499 books:</span>
+              <span className={form.quantity >= 100 && form.quantity < 500 ? 'font-semibold text-green-600' : ''}>5% off</span>
+            </div>
+            <div className="flex justify-between">
+              <span>500-999 books:</span>
+              <span className={form.quantity >= 500 && form.quantity < 1000 ? 'font-semibold text-green-600' : ''}>10% off</span>
+            </div>
+            <div className="flex justify-between">
+              <span>1000+ books:</span>
+              <span className={form.quantity >= 1000 ? 'font-semibold text-green-600' : ''}>15% off</span>
+            </div>
           </div>
-        )}
+        </div>
+                  <ShippingEstimate />
+                </div>
+              )}
+            </div>
+          </form>
+        </div>
+        <div className="w-full xl:w-2/5 bg-white p-4 sm:p-6 lg:p-8 rounded-2xl shadow-lg">
+          <img src={RightImage} alt="High Quality Book" className="w-full h-32 sm:h-40 lg:h-48 object-cover mb-4 rounded" />
+          <h2 className="text-lg sm:text-xl font-bold text-[#2A428C] mb-2 text-center">High-Quality Photo Book Printing</h2>
+          <div className="w-full h-0.5 bg-gray-300 mb-4"></div>
+          {[
+            [
+              ['Book Size', form.bookSize || '-'],
+              ['Page Count', form.page_count || '-']
+            ],
+            [
+              ['Binding Type', form.binding_id || '-'],
+              ['Interior Color', form.interior_color_id || '-']
+            ],
+            [
+              ['Paper Type', form.paper_type_id || '-'],
+              ['Cover Finish', form.cover_finish_id || '-']
+            ]
+          ].map((row, i) => (
+            <React.Fragment key={i}>
+              <SummaryRow pairs={row} />
+              <div className={`w-full h-px bg-gray-200 ${i === 2 ? 'my-4' : 'my-2'}`}></div>
+            </React.Fragment>
+          ))}
+          <div className="flex justify-center mt-6">
+            <div className="w-full max-w-xs">
+              <RedirectButton />
+            </div>
+          </div>
+        </div>
       </div>
       <Footer />
     </>
