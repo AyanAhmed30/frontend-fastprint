@@ -4,8 +4,9 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import PersonalIcon from "../assets/images/newsletter.png";
 import BusinessIcon from "../assets/images/newsletter.png";
+import { BASE_URL } from "../services/baseURL"; // Import centralized base URL
 
-const API_BASE_URL = 'http://localhost:8000/api/userprofiles';
+const API_BASE_URL = `${BASE_URL}api/userprofiles`;
 
 const apiService = {
   getHeaders() {
