@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from "../services/baseURL"; // Import centralized base URL
 
 const ManageShipping = () => {
   const [shippingRequests, setShippingRequests] = useState([]);
@@ -42,14 +43,14 @@ const ManageShipping = () => {
         setLoading(true);
         
         // Fetch shipping requests
-        const shippingResponse = await fetch('http://127.0.0.1:8000/api/shipping-requests/', {
+        const shippingResponse = await fetch(`${BASE_URL}api/shipping-requests/`, {
           headers: getAuthHeaders(),
         });
         const shippingData = await handleResponse(shippingResponse);
         setShippingRequests(shippingData);
         
         // Fetch book projects
-        const booksResponse = await fetch('http://127.0.0.1:8000/api/book/all-orders/', {
+        const booksResponse = await fetch(`${BASE_URL}api/book/all-orders/`, {
           headers: getAuthHeaders(),
         });
         const booksData = await handleResponse(booksResponse);
@@ -80,9 +81,9 @@ const ManageShipping = () => {
     if (!window.confirm('Are you sure you want to delete this shipping request?')) return;
     
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/shipping-requests/${id}/`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
+    const response = await fetch(`${BASE_URL}api/shipping-requests/${id}/`, {
+  method: 'DELETE',
+  headers: getAuthHeaders(),
       });
       
       if (response.ok) {
