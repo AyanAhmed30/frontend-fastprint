@@ -9,7 +9,7 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState("");
-  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({ email: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [focusedField, setFocusedField] = useState("");
@@ -18,52 +18,56 @@ const Login = () => {
     setMounted(true);
   }, []);
 
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase());
-  const validatePassword = (password) => password.length >= 6;
+  const validateEmail = (email) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase());
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
     if (error) setError("");
-    setErrors((prev) => {
-      const newErrors = { ...prev };
-      if (name === "email") {
-        newErrors.email = !value ? "Email is required." : validateEmail(value) ? "" : "Please enter a valid email address.";
-      }
-      if (name === "password") {
-        newErrors.password = !value ? "Password is required." : validatePassword(value) ? "" : "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
-      }
-      return newErrors;
-    });
+    if (name === "email") {
+      setErrors((prev) => ({
+        ...prev,
+        email: !value
+          ? "Email is required."
+          : validateEmail(value)
+          ? ""
+          : "Please enter a valid email address.",
+      }));
+    }
   };
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
     setFocusedField("");
-    setErrors((prev) => {
-      const newErrors = { ...prev };
-      if (name === "email") {
-        newErrors.email = !value ? "Email is required." : validateEmail(value) ? "" : "Please enter a valid email address.";
-      }
-      if (name === "password") {
-        newErrors.password = !value ? "Password is required." : validatePassword(value) ? "" : "Password must be at least 6 characters.";
-      }
-      return newErrors;
-    });
+    if (name === "email") {
+      setErrors((prev) => ({
+        ...prev,
+        email: !value
+          ? "Email is required."
+          : validateEmail(value)
+          ? ""
+          : "Please enter a valid email address.",
+      }));
+    }
   };
 
-  const isFormValid = () => validateEmail(form.email) && validatePassword(form.password) && !isLoading;
+  const isFormValid = () => validateEmail(form.email) && !isLoading;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    const emailError = !form.email ? "Email is required." : validateEmail(form.email) ? "" : "Please enter a valid email address.";
-    const passwordError = !form.password ? "Password is required." : validatePassword(form.password) ? "" : "Password must be at least 6 characters.";
-    setErrors({ email: emailError, password: passwordError });
+    const emailError = !form.email
+      ? "Email is required."
+      : validateEmail(form.email)
+      ? ""
+      : "Please enter a valid email address.";
 
-    if (emailError || passwordError) {
+    setErrors({ email: emailError });
+
+    if (emailError) {
       setIsLoading(false);
       return;
     }
@@ -73,7 +77,9 @@ const Login = () => {
       if (user?.is_admin) navigate("/admin");
       else navigate("/account-settings");
     } catch {
-      setError("Invalid email or password. Please try with correct credentials");
+      setError(
+        "Invalid email or password. Please try with correct credentials"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -130,7 +136,9 @@ const Login = () => {
           >
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-4 bg-gradient-to-r from-gray-900 to-blue-800 bg-clip-text">
               Welcome Back{" "}
-              <span className="inline-block text-2xl sm:text-3xl animate-wave">👋</span>
+              <span className="inline-block text-2xl sm:text-3xl animate-wave">
+                👋
+              </span>
             </h1>
             <div className="relative">
               <div
@@ -138,17 +146,18 @@ const Login = () => {
                   mounted ? "w-[150px] sm:w-[180px]" : "w-0"
                 }`}
                 style={{ backgroundColor: "rgba(1, 106, 179, 1)" }}
-              />
+              ></div>
               <div
                 className={`mt-2 h-[2px] rounded-full mx-auto transition-all duration-1000 delay-700 ${
                   mounted ? "w-[75px] sm:w-[90px]" : "w-0"
                 }`}
                 style={{ backgroundColor: "rgba(1, 106, 179, 1)" }}
-              />
+              ></div>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col space-y-6" noValidate>
+            {/* Email Input */}
             <div className="relative group">
               <h2>Email</h2>
               <input
@@ -174,7 +183,7 @@ const Login = () => {
                 className={`absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400/20 to-cyan-400/20 transition-opacity duration-300 pointer-events-none ${
                   focusedField === "email" ? "opacity-100" : "opacity-0"
                 }`}
-              />
+              ></div>
               {errors.email && (
                 <p id="email-error" className="mt-1 text-xs text-black">
                   {errors.email}
@@ -182,6 +191,7 @@ const Login = () => {
               )}
             </div>
 
+            {/* Password Input */}
             <div className="relative group">
               <h2>Password</h2>
               <input
@@ -190,7 +200,7 @@ const Login = () => {
                 value={form.password}
                 onChange={handleChange}
                 onFocus={() => setFocusedField("password")}
-                onBlur={handleBlur}
+                onBlur={() => setFocusedField("")}
                 placeholder="Password"
                 required
                 disabled={isLoading}
@@ -200,19 +210,7 @@ const Login = () => {
                     : "border-gray-200 hover:border-gray-300"}
                   ${isLoading ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"}
                   focus:outline-none focus:ring-0`}
-                aria-invalid={!!errors.password}
-                aria-describedby="password-error"
               />
-              <div
-                className={`absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400/20 to-cyan-400/20 transition-opacity duration-300 pointer-events-none ${
-                  focusedField === "password" ? "opacity-100" : "opacity-0"
-                }`}
-              />
-              {errors.password && (
-                <p id="password-error" className="mt-1 text-xs text-black">
-                  {errors.password}
-                </p>
-              )}
             </div>
 
             <button
@@ -225,13 +223,29 @@ const Login = () => {
                 }`}
               style={{ backgroundColor: "rgba(0, 150, 205, 1)" }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               <span className="relative z-10 flex items-center justify-center">
                 {isLoading ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Logging in...
                   </>
@@ -245,8 +259,16 @@ const Login = () => {
           {error && (
             <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg transition-all duration-300 animate-shake">
               <p className="text-red-600 text-sm text-center flex items-center justify-center">
-                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 {error}
               </p>
@@ -255,7 +277,11 @@ const Login = () => {
 
           <p className="mt-8 text-gray-700 text-sm text-center">
             Don't have an account?{" "}
-            <Link to="/signup" className="font-semibold hover:underline transition-all duration-300 hover:scale-105 inline-block" style={{ color: "rgba(1, 106, 179, 1)" }}>
+            <Link
+              to="/signup"
+              className="font-semibold hover:underline transition-all duration-300 hover:scale-105 inline-block"
+              style={{ color: "rgba(1, 106, 179, 1)" }}
+            >
               Sign Up
             </Link>
           </p>
@@ -264,18 +290,37 @@ const Login = () => {
 
       <style jsx>{`
         @keyframes wave {
-          0%, 100% { transform: rotate(0deg); }
-          25% { transform: rotate(20deg); }
-          75% { transform: rotate(-20deg); }
+          0%,
+          100% {
+            transform: rotate(0deg);
+          }
+          25% {
+            transform: rotate(20deg);
+          }
+          75% {
+            transform: rotate(-20deg);
+          }
         }
         @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          25% {
+            transform: translateX(-5px);
+          }
+          75% {
+            transform: translateX(5px);
+          }
         }
         @keyframes bounce-gentle {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-5px); }
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-5px);
+          }
         }
         .animate-wave {
           animation: wave 2s infinite;
@@ -288,7 +333,7 @@ const Login = () => {
           animation: bounce-gentle 1s ease-in-out 2;
         }
         .animate-pulse-slow {
-          animation: pulse 4s cubic-bezier(0.4,0,0.6,1) infinite;
+          animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
       `}</style>
     </div>
