@@ -574,50 +574,49 @@ const ThesisPricingCalculator = () => {
         </div>
 
         {/* Summary Section */}
-        <div className="w-full xl:w-2/5 bg-white p-4 sm:p-6 lg:p-8 rounded-2xl shadow-lg">
-          <div className="relative w-full h-32 sm:h-40 lg:h-48 bg-gray-200 mb-4 rounded overflow-hidden">
-            <img
-              src={RightImage}
-              alt="Professional Thesis Binding"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </div>
-
-          <h2 className="text-lg sm:text-xl font-bold text-[#2A428C] mb-2 text-center">
-            Professional Thesis Binding
-          </h2>
-          <div className="w-full h-0.5 bg-gray-300 mb-4"></div>
-
-          {/* Summary Grid */}
-          <div className="space-y-2 text-sm mb-6">
-            {[
-              ['Book Size', form.bookSize || '-', 'Page Count', form.pageCount || '-'],
-              ['Binding Type', getSummaryValue('binding', form.binding_id), 'Spine Type', getSummaryValue('spine', form.spine_id)],
-              ['Exterior Color', getSummaryValue('exteriorColor', form.exterior_color_id), 'Foil Stamping', getSummaryValue('foilStamping', form.foil_stamping_id)],
-              ['Screen Stamping', getSummaryValue('screenStamping', form.screen_stamping_id), 'Corner Protector', getSummaryValue('cornerProtector', form.corner_protector_id)],
-              ['Interior Color', getSummaryValue('interiorColor', form.interior_color_id), 'Paper Type', getSummaryValue('paperType', form.paper_type_id)],
-              ['Quantity', form.quantity.toString(), 'Total Pages', (form.pageCount * form.quantity).toString() || '-']
-            ].map(([label1, value1, label2, value2], i) => (
-              <div key={i}>
-                <div className="flex justify-between mb-1">
-                  <div>
-                    <p className="font-semibold text-gray-600">{label1}</p>
-                    <p className="text-black">{value1}</p>
+        <div className="w-full xl:w-2/5">
+          <div className="sticky top-8 bg-white p-4 sm:p-6 lg:p-8 rounded-2xl shadow-lg">
+            <div className="relative w-full h-32 sm:h-40 lg:h-48 bg-gray-200 mb-4 rounded overflow-hidden">
+              <img
+                src={RightImage}
+                alt="Professional Thesis Binding"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
+            <h2 className="text-lg sm:text-xl font-bold text-[#2A428C] mb-2 text-center">
+              Professional Thesis Binding
+            </h2>
+            <div className="w-full h-0.5 bg-gray-300 mb-4"></div>
+            {/* Summary Grid */}
+            <div className="space-y-2 text-sm mb-6">
+              {[
+                ['Book Size', form.bookSize || '-', 'Page Count', form.pageCount || '-'],
+                ['Binding Type', getSummaryValue('binding', form.binding_id), 'Spine Type', getSummaryValue('spine', form.spine_id)],
+                ['Exterior Color', getSummaryValue('exteriorColor', form.exterior_color_id), 'Foil Stamping', getSummaryValue('foilStamping', form.foil_stamping_id)],
+                ['Screen Stamping', getSummaryValue('screenStamping', form.screen_stamping_id), 'Corner Protector', getSummaryValue('cornerProtector', form.corner_protector_id)],
+                ['Interior Color', getSummaryValue('interiorColor', form.interior_color_id), 'Paper Type', getSummaryValue('paperType', form.paper_type_id)],
+                ['Quantity', form.quantity.toString(), 'Total Pages', (form.pageCount * form.quantity).toString() || '-']
+              ].map(([label1, value1, label2, value2], i) => (
+                <div key={i}>
+                  <div className="flex justify-between mb-1">
+                    <div>
+                      <p className="font-semibold text-gray-600">{label1}</p>
+                      <p className="text-black">{value1}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-600">{label2}</p>
+                      <p className="text-black">{value2}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-600">{label2}</p>
-                    <p className="text-black">{value2}</p>
-                  </div>
+                  <div className="w-full h-px bg-gray-200"></div>
                 </div>
-                <div className="w-full h-px bg-gray-200"></div>
+              ))}
+            </div>
+            {/* Button at bottom */}
+            <div className="flex justify-center mt-6">
+              <div className="w-full max-w-xs">
+                <RedirectButton />
               </div>
-            ))}
-          </div>
-
-          {/* Button at bottom */}
-          <div className="flex justify-center mt-6">
-            <div className="w-full max-w-xs">
-              <RedirectButton />
             </div>
           </div>
         </div>
