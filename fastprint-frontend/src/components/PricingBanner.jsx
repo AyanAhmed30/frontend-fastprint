@@ -16,8 +16,7 @@ const PricingBanner = () => {
           Pricing <span className="text-[#F8C20A]">Calculator</span>
         </h2>
         <p className="text-sm sm:text-base leading-relaxed px-2 md:px-0">
-          Calculate your book's printing costs, see distribution options, estimate potential earnings, and
-          download free templates with our book cost calculator.
+  Easily calculate the printing cost of your book using our simple book cost calculator.
         </p>
       </div>
       {/* Right Images */}
