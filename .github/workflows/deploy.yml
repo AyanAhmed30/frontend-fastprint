@@ -4,14 +4,17 @@ on:
   push:
     branches:
       - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout the repository code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2️⃣ Setup SSH access to your EC2
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -19,23 +22,28 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Sync frontend code (excluding node_modules)
+      # 3️⃣ Ensure target directories exist on EC2
+      - name: Create target directory on EC2
         run: |
-          rsync -avz --exclude 'node_modules' -e "ssh -o StrictHostKeyChecking=no" ./fastprint-frontend/ ubuntu@${{ secrets.EC2_HOST }}:~/frontend/FastPrint-Frontend/fastprint-frontend/
+          ssh ubuntu@${{ secrets.EC2_HOST }} "mkdir -p ~/frontend/fresh-start/fastprint-frontend"
 
-      - name: Install dependencies & restart frontend with PM2
+      # 4️⃣ Sync frontend code (excluding node_modules)
+      - name: Sync frontend code
+        run: |
+          rsync -avz --exclude 'node_modules' -e "ssh -o StrictHostKeyChecking=no" ./fastprint-frontend/ ubuntu@${{ secrets.EC2_HOST }}:~/frontend/fresh-start/fastprint-frontend/
+
+      # 5️⃣ Install dependencies & restart PM2 on EC2
+      - name: Install dependencies & restart frontend
         run: |
           ssh ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
             set -e
-            cd ~/frontend/FastPrint-Frontend/fastprint-frontend
-
-            # Install/update Node modules
+            cd ~/frontend/fresh-start/fastprint-frontend
+            # Install new dependencies if package.json changed
             npm install
-
-            # Restart frontend using PM2
-            pm2 stop frontend || true
-            pm2 start npm --name frontend -- start
+            # Build frontend if using Vite/React build
+            npm run build
+            # Restart PM2 process
+            pm2 restart frontend || pm2 start npm --name frontend -- run start
             pm2 save
-
-            echo "Deployment successful using PM2!"
+            echo "Deployment successful!"
           EOF
