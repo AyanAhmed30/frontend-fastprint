@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth"; // Assuming this manages user auth/token
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -106,6 +107,7 @@ const FloatingLabelInput = ({ name, label, type = "text", value, onChange, disab
 
 export default function AccountSettings() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -192,36 +194,27 @@ export default function AccountSettings() {
   const handleSave = async () => {
     setLoading(true);
     setMessage("");
-    
     try {
       const { id, password, ...profileData } = formData;
-      
       const dataToSend = {
         ...profileData,
         ...(password && password.trim() && { password })
       };
-
-      console.log("Saving data:", dataToSend);
-
       const res = await apiService.saveSettings(dataToSend);
-      
       setMessage(res.message || "Profile saved successfully!");
       setIsSaved(true);
-      
       setFormData(prev => ({
         ...prev,
         password: "",
       }));
-
       setTimeout(() => {
         setRefreshTrigger(prev => prev + 1);
+        navigate("/");
       }, 1000);
-
     } catch (err) {
       setMessage(`Error: ${err.message}`);
       console.error("Save error:", err);
     }
-    
     setLoading(false);
   };
 
