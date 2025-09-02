@@ -588,35 +588,38 @@ const PhotoBookCalculator = () => {
             </div>
           </form>
         </div>
-        <div className="w-full xl:w-2/5 bg-white p-4 sm:p-6 lg:p-8 rounded-2xl shadow-lg">
-          <img src={RightImage} alt="High Quality Book" className="w-full h-32 sm:h-40 lg:h-48 object-cover mb-4 rounded" />
-          <h2 className="text-lg sm:text-xl font-bold text-[#2A428C] mb-2 text-center">High-Quality Photo Book Printing</h2>
-          <div className="w-full h-0.5 bg-gray-300 mb-4"></div>
-          {[
-            [
-              ['Book Size', form.bookSize || '-'],
-              ['Page Count', form.page_count || '-']
-            ],
-            [
-              ['Binding Type', form.binding_id || '-'],
-              ['Interior Color', form.interior_color_id || '-']
-            ],
-            [
-              ['Paper Type', form.paper_type_id || '-'],
-              ['Cover Finish', form.cover_finish_id || '-']
-            ]
-          ].map((row, i) => (
-            <React.Fragment key={i}>
-              <SummaryRow pairs={row} />
-              <div className={`w-full h-px bg-gray-200 ${i === 2 ? 'my-4' : 'my-2'}`}></div>
-            </React.Fragment>
-          ))}
-          <div className="flex justify-center mt-6">
-            <div className="w-full max-w-xs">
-              <RedirectButton />
-            </div>
-          </div>
-        </div>
+       <div className="w-full xl:w-2/5">
+  <div className="sticky top-8 bg-white p-4 sm:p-6 lg:p-8 rounded-2xl shadow-lg">
+    <img src={RightImage} alt="High Quality Book" className="w-full h-32 sm:h-40 lg:h-48 object-cover mb-4 rounded" />
+    <h2 className="text-lg sm:text-xl font-bold text-[#2A428C] mb-2 text-center">High-Quality Photo Book Printing</h2>
+    <div className="w-full h-0.5 bg-gray-300 mb-4"></div>
+    {[
+      [
+        ['Book Size', form.bookSize || '-'],
+        ['Page Count', form.page_count || '-']
+      ],
+      [
+        ['Binding Type', form.binding_id || '-'],
+        ['Interior Color', form.interior_color_id || '-']
+      ],
+      [
+        ['Paper Type', form.paper_type_id || '-'],
+        ['Cover Finish', form.cover_finish_id || '-']
+      ]
+    ].map((row, i) => (
+      <React.Fragment key={i}>
+        <SummaryRow pairs={row} />
+        <div className={`w-full h-px bg-gray-200 ${i === 2 ? 'my-4' : 'my-2'}`}></div>
+      </React.Fragment>
+    ))}
+    <div className="flex justify-center mt-6">
+      <div className="w-full max-w-xs">
+        <RedirectButton />
+      </div>
+    </div>
+  </div>
+</div>
+
       </div>
       <Footer />
     </>
