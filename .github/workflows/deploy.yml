@@ -24,19 +24,19 @@ jobs:
         run: |
           rsync -avz --exclude 'node_modules' -e "ssh -o StrictHostKeyChecking=no" ./fastprint-frontend/ ubuntu@${{ secrets.EC2_HOST }}:~/frontend/FastPrint-Frontend/fastprint-frontend/
 
-      - name: Build and run Docker container on EC2 with Node 20
+      - name: Install dependencies & restart frontend with PM2
         run: |
           ssh ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
             set -e
             cd ~/frontend/FastPrint-Frontend/fastprint-frontend
-            docker stop fastprint-frontend || true
-            docker rm fastprint-frontend || true
 
-            # Update Dockerfile to use Node 20
-            sed -i 's|FROM node:18|FROM node:20|g' Dockerfile
+            # Install/update Node modules
+            npm install
 
-            docker build --no-cache -t fastprint-frontend .
-            docker run -d --name fastprint-frontend -p 4173:4173 fastprint-frontend
+            # Restart frontend using PM2
+            pm2 stop frontend || true
+            pm2 start npm --name frontend -- start
+            pm2 save
 
-            echo "Deployment successful!"
+            echo "Deployment successful using PM2!"
           EOF
