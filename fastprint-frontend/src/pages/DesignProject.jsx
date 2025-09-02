@@ -6,65 +6,123 @@ import { useEffect, useState, useRef, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import * as pdfjsLib from "pdfjs-dist";
-import QuantityEstimateDropdown from "../components/QuantityEstimateDropdown";
+// Frontend-only calculators and config
+import {
+  BOOK_SIZES,
+  BINDING_RULES_BOOK,
+  SPECIAL_SIZE_RULES,
+  OPTIONS_CONFIG_BOOK,
+  SIZE_SPECIFIC_PRICING_BOOK,
+  COMIC_TRIM_SIZES,
+  COMIC_INTERIOR_COLORS,
+  COMIC_PAPER_TYPES,
+  COMIC_COVER_FINISHES,
+  SIMPLE_TRIM_SIZES,
+  BINDING_CONFIGS_SIMPLE,
+  OPTIONS_CONFIG_SIMPLE,
+  CALENDAR_SIZES,
+  CALENDAR_OPTIONS,
+  DISCOUNTS
+} from "../calculators/config";
+import {
+  getAvailableBindingsBook,
+  calculatePriceBook,
+  getAvailableBindingsComic,
+  calculatePriceComic,
+  getAvailableBindingsSimple,
+  calculatePriceSimple,
+  calculatePriceCalendar
+} from "../calculators/pricing";
 import { BASE_URL } from "../services/baseURL";
 
 // PDF.js worker setup
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 // Image imports - consolidated
-import PerfectBoundImg from "../assets/images/perfectbound.png";
-import CoilBoundImg from "../assets/images/coilbound.png";
-import SaddleImg from "../assets/images/saddle.png";
-import CaseWrap from "../assets/images/casewrap.png";
-import LinenWrap from "../assets/images/linenwrap.png";
+import PerfectBoundImg from "../assets/images/img58.png";
+import CoilBoundImg from "../assets/images/coill.jpg";
+import SaddleImg from "../assets/images/saddlee.jpg";
+import CaseWrap from "../assets/images/paperbackk.jpg";
+import LinenWrap from "../assets/images/linenn.jpg";
 import WireOBoundImg from "../assets/images/wireo.jpg";
-import StandardBlackandWhite from "../assets/images/int1.png";
-import PremiumBlackandWhite from "../assets/images/in2.png";
-import StandardColor from "../assets/images/in3.png";
-import PremiumColor from "../assets/images/int4.png";
-import Creamuncoated from "../assets/images/pp1.jpg";
-import Whiteuncoated from "../assets/images/pp2.jpg";
-import Whitecoated from "../assets/images/pp3.jpg";
-import Whitecoatedd from "../assets/images/pp4.jpg";
-import Glossy from "../assets/images/glossy.png";
-import Matty from "../assets/images/matty.png";
+import StandardBlackandWhite from "../assets/images/pp1.jpg";
+import PremiumBlackandWhite from "../assets/images/pp2.jpg";
+import StandardColor from "../assets/images/pp3.jpg";
+import PremiumColor from "../assets/images/pp4.jpg";
+import Creamuncoated from "../assets/images/qa1.png";
+import Whiteuncoated from "../assets/images/qa2.png";
+import Whitecoated from "../assets/images/qa3.png";
+import Whitecoatedd from "../assets/images/qa4.png";
+import Glossy from "../assets/images/gggg.jpg";
+import Matty from "../assets/images/mmmm.jpg";
 
 const API_BASE = `${BASE_URL}`;
 
 // Configuration objects
 const IMAGE_MAPS = {
-  binding: { "Perfect Bound": PerfectBoundImg, "Coil Bound": CoilBoundImg, "Saddle Stitch": SaddleImg, "Case Wrap": CaseWrap, "Linen Wrap": LinenWrap, "Wire O": WireOBoundImg },
-  interiorColor: { "Standard Black & White": StandardBlackandWhite, "Premium Black & White": PremiumBlackandWhite, "Standard Color": StandardColor, "Premium Color": PremiumColor },
-  paperType: { "60# Cream-Uncoated": Creamuncoated, "60# White-Uncoated": Whiteuncoated, "80# White-Coated": Whitecoated, "100# White-Coated": Whitecoatedd },
-  coverFinish: { Gloss: Glossy, Matte: Matty }
+  binding: {
+    "Perfect Bound": PerfectBoundImg,
+    "Coil Bound": CoilBoundImg,
+    "Saddle Stitch": SaddleImg,
+    "Case Wrap": CaseWrap,
+    "Linen Wrap": LinenWrap,
+    "Wire O": WireOBoundImg
+  },
+  interiorColor: {
+    // Support both display name variants
+    "Standard Black and White": StandardBlackandWhite,
+    "Standard Black & White": StandardBlackandWhite,
+    "Premium Black and White": PremiumBlackandWhite,
+    "Premium Black & White": PremiumBlackandWhite,
+    "Standard Color": StandardColor,
+    "Premium Color": PremiumColor
+  },
+  paperType: {
+    // Support hyphenated and non-hyphenated variants used across calculators
+    "60# Cream Uncoated": Creamuncoated,
+    "60# Cream-Uncoated": Creamuncoated,
+    "60# White Uncoated": Whiteuncoated,
+    "60# White-Uncoated": Whiteuncoated,
+    "70# White-Uncoated": Whitecoatedd,
+    "80# White Coated": Whitecoated,
+    "80# White-Coated": Whitecoated,
+    "100# White Coated": Whitecoatedd,
+    "100# White-Coated": Whitecoatedd
+  },
+  coverFinish: {
+    // Support both 'Gloss' and 'Glossy'
+    "Gloss": Glossy,
+    "Glossy": Glossy,
+    "Matte": Matty
+  }
 };
 
-const API_ENDPOINTS = {
-  "Photo Book": { dropdown: "/api/photobook/dropdowns/", binding: "/api/photobook/bindings/", calculate: "/api/photobook/calculate/" },
-  "Print Book": { dropdown: "/api/calculator/dropdowns/", binding: "/api/calculator/bindings/", calculate: "/api/calculator/calculate/" },
-  "Magazine": { dropdown: "/api/magazine/dropdowns/", binding: "/api/magazine/bindings/", calculate: "/api/magazine/calculate/" },
-  "Year Book": { dropdown: "/api/yearbook/dropdowns/", binding: "/api/yearbook/bindings/", calculate: "/api/yearbook/calculate/" },
-  "Calender": { dropdown: "/api/calender/dropdowns/", binding: "/api/calender/bindings/", calculate: "/api/calender/calculate/" },
-  "Comic Book": { dropdown: "/api/comicbook/dropdowns/", binding: "/api/comicbook/bindings/", calculate: "/api/comicbook/calculate/" }
-};
+// Local helpers to build frontend-only option lists compatible with existing UI
+const toOptions = (names) => names.map((name, idx) => ({ id: idx + 1, name }));
+const toOptionsFromObjects = (arr) => arr.map((o, idx) => ({ id: idx + 1, name: o.name, dbName: o.dbName }));
 
 const getDiscountInfo = (qty) => {
-  if (qty >= 1000) return { percent: 15, price: 17.93 };
-  if (qty >= 500) return { percent: 10, price: 18.98 };
-  if (qty >= 100) return { percent: 5, price: 20.04 };
+  if (qty >= 1000) return { percent: 15 };
+  if (qty >= 500) return { percent: 10 };
+  if (qty >= 100) return { percent: 5 };
   return null;
 };
 
 // Reusable components
-const OptionField = ({ title, name, options, imageMap, form, handleChange }) => (
-  <fieldset className="mb-6">
-    <legend className="font-semibold text-[#2A428C] mb-4 text-lg">{title}</legend>
-    <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
+const OptionField = ({ title, name, options, imageMap, form, handleChange, stepAccessible = true }) => (
+  <fieldset className="mb-5 md:mb-6">
+    <legend className="font-semibold text-[#2A428C] mb-3 md:mb-4 text-lg">{title}</legend>
+    <div className="flex flex-wrap justify-start items-center gap-2 md:gap-3 lg:gap-4 max-w-3xl mx-auto">
       {Array.from(new Map(options.map(opt => [opt.name, opt])).values()).map(opt => (
-        <label key={opt.id} className={`cursor-pointer flex flex-col items-center w-20 md:w-28 p-2 md:p-3 border rounded-lg transition ${form[name] === opt.id ? "border-blue-600 bg-blue-50" : "border-gray-300 bg-white"}`}>
-          <input type="radio" name={name} value={opt.id} checked={form[name] === opt.id} onChange={handleChange} className="mb-1 md:mb-2" />
-          {imageMap[opt.name] && <img src={imageMap[opt.name]} alt={opt.name} className="w-10 h-10 md:w-16 md:h-16 object-contain mb-1 md:mb-2" />}
+        <label key={opt.id} className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${String(form[name]) === String(opt.id) ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200" : "border-gray-300 bg-white"} ${!stepAccessible ? 'opacity-40 cursor-not-allowed' : ''}`} role="radio" aria-checked={String(form[name]) === String(opt.id)} aria-disabled={!stepAccessible}>
+          <input type="radio" name={name} value={opt.id} checked={String(form[name]) === String(opt.id)} onChange={stepAccessible ? handleChange : undefined} disabled={!stepAccessible} className="sr-only" />
+          <span className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${String(form[name]) === String(opt.id) ? 'border-blue-600' : 'border-gray-400'}`}> 
+            <span className={`block m-[2px] w-2.5 h-2.5 rounded-full ${String(form[name]) === String(opt.id) ? 'bg-blue-600' : 'bg-transparent'}`}></span>
+          </span>
+          {(() => {
+            const src = imageMap[opt.name] || (opt.dbName ? imageMap[opt.dbName] : undefined);
+            return src ? <img src={src} alt={opt.name} className="w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain mb-1 md:mb-2" /> : null;
+          })()}
           <span className="text-center text-xs md:text-sm text-gray-700">{opt.name}</span>
         </label>
       ))}
@@ -164,11 +222,12 @@ const DesignProject = () => {
     usedExpertCover: false,
     coverFile: null,
     projectData: null,
-    dropdowns: {},
-    bindings: [],
+    dropdowns: {}, // { trim_sizes, interior_colors, paper_types, cover_finishes }
+    bindings: [],  // array of {id,name}
     initialBindings: [],
     initialBindingsLoaded: false,
-    loading: true,
+    loading: false,
+    availableBindings: [], // names of currently available binding options
     result: null,
     calculating: false,
     form: {
@@ -189,64 +248,49 @@ const DesignProject = () => {
     if (location.state) updateState({ projectData: location.state });
   }, [location.state]);
 
-  // API functions
-  const fetchData = async (url) => {
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      const res = await axios.get(`${API_BASE}${url}`, config);
-      return res.data || [];
-    } catch (err) {
-      console.error(`Failed to load data from ${url}:`, err);
-      if (err.response?.status === 401) {
-        // Handle unauthorized error (e.g., redirect to login)
-        navigate('/login');
+  // Build local dropdowns and initial bindings based on category
+  const isCalendarCategory = (category) => category === "Calender" || category === "Calendar";
+
+  const buildLocalConfig = (category) => {
+    switch (category) {
+      case "Print Book":
+      case "Photo Book": {
+        const trim_sizes = toOptions(BOOK_SIZES);
+        const interior_colors = toOptionsFromObjects(OPTIONS_CONFIG_BOOK.interiorColor);
+        const paper_types = toOptionsFromObjects(OPTIONS_CONFIG_BOOK.paperType);
+        const cover_finishes = toOptionsFromObjects(OPTIONS_CONFIG_BOOK.coverFinish);
+        const allBindings = ['Perfect Bound','Saddle Stitch','Case Wrap','Linen Wrap','Coil Bound'];
+        return { dropdowns: { trim_sizes, interior_colors, paper_types, cover_finishes }, allBindings: toOptions(allBindings) };
       }
-      return [];
+      case "Comic Book": {
+        const trim_sizes = COMIC_TRIM_SIZES.map((t) => ({ id: t.id, name: t.name }));
+        const interior_colors = toOptionsFromObjects(COMIC_INTERIOR_COLORS);
+        const paper_types = toOptionsFromObjects(COMIC_PAPER_TYPES);
+        const cover_finishes = toOptionsFromObjects(COMIC_COVER_FINISHES);
+        const allBindings = ['Perfect Bound','Saddle Stitch','Case Wrap','Linen Wrap','Coil Bound'];
+        return { dropdowns: { trim_sizes, interior_colors, paper_types, cover_finishes }, allBindings: toOptions(allBindings) };
+      }
+      case "Magazine":
+      case "Year Book": {
+        const trim_sizes = toOptions(SIMPLE_TRIM_SIZES);
+        const interior_colors = toOptionsFromObjects(OPTIONS_CONFIG_SIMPLE.interiorColor);
+        const paper_types = toOptionsFromObjects(OPTIONS_CONFIG_SIMPLE.paperType);
+        const cover_finishes = toOptionsFromObjects(OPTIONS_CONFIG_SIMPLE.coverFinish);
+        const allBindings = Object.keys(BINDING_CONFIGS_SIMPLE);
+        return { dropdowns: { trim_sizes, interior_colors, paper_types, cover_finishes }, allBindings: toOptions(allBindings) };
+      }
+      case "Calender":
+      case "Calendar": {
+        const trim_sizes = toOptions(CALENDAR_SIZES); // not used in UI form
+        const interior_colors = toOptionsFromObjects(CALENDAR_OPTIONS.interiorColor);
+        const paper_types = toOptionsFromObjects(CALENDAR_OPTIONS.paperType);
+        const cover_finishes = toOptionsFromObjects(CALENDAR_OPTIONS.coverFinish);
+        const allBindings = CALENDAR_OPTIONS.bindingType.map(o => o.name);
+        return { dropdowns: { trim_sizes, interior_colors, paper_types, cover_finishes }, allBindings: toOptions(allBindings) };
+      }
+      default:
+        return { dropdowns: { trim_sizes: [], interior_colors: [], paper_types: [], cover_finishes: [] }, allBindings: [] };
     }
-  };
-
-  const fetchInitialBindings = async () => {
-    const endpoints = API_ENDPOINTS[state.projectData?.category];
-    if (!endpoints) return;
-
-    const bindingsData = await fetchData(endpoints.binding);
-    updateState({ 
-      initialBindings: bindingsData, 
-      bindings: bindingsData, 
-      initialBindingsLoaded: true 
-    });
-    localStorage.setItem("bindings", JSON.stringify(bindingsData));
-  };
-
-  const fetchDropdownsAndBindings = async () => {
-    const endpoints = API_ENDPOINTS[state.projectData?.category];
-    if (!endpoints) {
-      updateState({ dropdowns: {}, loading: false });
-      return;
-    }
-
-    const dropdownData = await fetchData(endpoints.dropdown);
-    updateState({ dropdowns: dropdownData });
-
-    ["cover_finishes", "interior_colors", "paper_types", "trim_sizes"].forEach(key => {
-      localStorage.setItem(key, JSON.stringify(dropdownData[key] || []));
-    });
-
-    await fetchInitialBindings();
-    updateState({ loading: false });
-  };
-
-  const fetchFilteredBindings = async (trim_size_id, page_count) => {
-    const endpoints = API_ENDPOINTS[state.projectData?.category];
-    if (!endpoints) return;
-
-    const params = state.projectData.category === "Calender" ? {} : { trim_size_id, page_count };
-    const bindingsData = await fetchData(`${endpoints.binding}?${new URLSearchParams(params)}`);
-    updateState({ bindings: bindingsData });
   };
 
   useEffect(() => {
@@ -256,30 +300,44 @@ const DesignProject = () => {
     }
     
     if (!state.projectData?.category) return;
-    updateState({ 
-      loading: true, 
-      bindings: [], 
-      initialBindings: [], 
-      initialBindingsLoaded: false, 
-      result: null 
+    const cfg = buildLocalConfig(state.projectData?.category);
+    updateState({
+      dropdowns: cfg.dropdowns,
+      initialBindings: cfg.allBindings,
+      bindings: cfg.allBindings,
+      availableBindings: cfg.allBindings.map(b => b.name),
+      initialBindingsLoaded: true,
+      loading: false,
+      result: null
     });
-    fetchDropdownsAndBindings();
   }, [state.projectData?.category, token, navigate]);
 
   useEffect(() => {
     if (!state.initialBindingsLoaded) return;
 
-    if (state.projectData?.category === "Calender") {
+    const { trim_size_id, page_count } = state.form;
+    const cat = state.projectData?.category;
+    if (isCalendarCategory(cat)) {
       updateState({ bindings: state.initialBindings });
       return;
     }
 
-    const { trim_size_id, page_count } = state.form;
-    if (trim_size_id && page_count) {
-      fetchFilteredBindings(trim_size_id, page_count);
-    } else {
-      updateState({ bindings: state.initialBindings });
+    if (!trim_size_id || !page_count) {
+      updateState({ bindings: state.initialBindings, availableBindings: state.initialBindings.map(b => b.name) });
+      return;
     }
+
+    let available = [];
+    if (cat === "Print Book" || cat === "Photo Book") {
+      const ts = state.dropdowns.trim_sizes.find(t => String(t.id) === String(trim_size_id));
+      available = getAvailableBindingsBook(Number(page_count), ts?.name || "");
+    } else if (cat === "Comic Book") {
+      available = getAvailableBindingsComic(Number(page_count));
+    } else {
+      // Magazine / Year Book
+      available = getAvailableBindingsSimple(Number(page_count));
+    }
+    updateState({ bindings: state.initialBindings, availableBindings: available });
   }, [state.form.trim_size_id, state.form.page_count, state.initialBindingsLoaded, state.projectData?.category]);
 
   // Event handlers
@@ -298,16 +356,10 @@ const DesignProject = () => {
     }
   };
 
-  const handlePriceCalculation = async (e) => {
+  const handlePriceCalculation = (e) => {
     if (e) e.preventDefault();
 
-    const endpoints = API_ENDPOINTS[state.projectData?.category];
-    if (!endpoints?.calculate) {
-      alert("Price calculation not available for this category");
-      return;
-    }
-
-    const isCalendar = state.projectData?.category === "Calender";
+    const isCalendar = isCalendarCategory(state.projectData?.category);
     const requiredFields = isCalendar
       ? ["binding_id", "interior_color_id", "paper_type_id", "cover_finish_id", "quantity"]
       : ["trim_size_id", "page_count", "binding_id", "interior_color_id", "paper_type_id", "cover_finish_id", "quantity"];
@@ -318,34 +370,61 @@ const DesignProject = () => {
       return;
     }
 
-    updateState({ calculating: true });
-    try {
-      const calculationData = {
+    const cat = state.projectData?.category;
+    const qty = Number(state.form.quantity) || 1;
+    let calc = null;
+    if (cat === "Print Book" || cat === "Photo Book") {
+      const ts = state.dropdowns.trim_sizes.find(t => String(t.id) === String(state.form.trim_size_id))?.name;
+      calc = calculatePriceBook({
+        bookSize: ts,
+        page_count: Number(state.form.page_count),
+        binding_id: state.bindings.find(b => String(b.id) === String(state.form.binding_id))?.name,
+        interior_color_id: state.dropdowns.interior_colors.find(o => String(o.id) === String(state.form.interior_color_id))?.dbName || state.dropdowns.interior_colors.find(o => String(o.id) === String(state.form.interior_color_id))?.name,
+        paper_type_id: state.dropdowns.paper_types.find(o => String(o.id) === String(state.form.paper_type_id))?.dbName || state.dropdowns.paper_types.find(o => String(o.id) === String(state.form.paper_type_id))?.name,
+        cover_finish_id: state.dropdowns.cover_finishes.find(o => String(o.id) === String(state.form.cover_finish_id))?.dbName || state.dropdowns.cover_finishes.find(o => String(o.id) === String(state.form.cover_finish_id))?.name,
+        quantity: qty
+      });
+    } else if (cat === "Comic Book") {
+      calc = calculatePriceComic({
         trim_size_id: state.form.trim_size_id,
-        page_count: isCalendar ? (state.form.page_count || 1) : state.form.page_count,
-        binding_id: state.form.binding_id,
-        interior_color_id: state.form.interior_color_id,
-        paper_type_id: state.form.paper_type_id,
-        cover_finish_id: state.form.cover_finish_id,
-        quantity: state.form.quantity
-      };
-
-      if (isCalendar) delete calculationData.trim_size_id;
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      
-      const response = await axios.post(`${API_BASE}${endpoints.calculate}`, calculationData, config);
-      updateState({ result: response.data });
-    } catch (error) {
-      console.error("Calculation error:", error);
-      alert("Failed to calculate price. Please try again.");
-    } finally {
-      updateState({ calculating: false });
+        page_count: Number(state.form.page_count),
+        binding_id: state.bindings.find(b => String(b.id) === String(state.form.binding_id))?.name,
+        interior_color_id: state.dropdowns.interior_colors.find(o => String(o.id) === String(state.form.interior_color_id))?.dbName,
+        paper_type_id: state.dropdowns.paper_types.find(o => String(o.id) === String(state.form.paper_type_id))?.dbName,
+        cover_finish_id: state.dropdowns.cover_finishes.find(o => String(o.id) === String(state.form.cover_finish_id))?.dbName,
+        quantity: qty
+      });
+    } else if (cat === "Magazine" || cat === "Year Book") {
+      calc = calculatePriceSimple({
+        page_count: Number(state.form.page_count),
+        binding_id: state.bindings.find(b => String(b.id) === String(state.form.binding_id))?.name,
+        interior_color_id: state.dropdowns.interior_colors.find(o => String(o.id) === String(state.form.interior_color_id))?.dbName,
+        paper_type_id: state.dropdowns.paper_types.find(o => String(o.id) === String(state.form.paper_type_id))?.dbName,
+        cover_finish_id: state.dropdowns.cover_finishes.find(o => String(o.id) === String(state.form.cover_finish_id))?.dbName,
+        quantity: qty
+      });
+    } else if (isCalendarCategory(cat)) {
+      calc = calculatePriceCalendar({
+        binding_id: state.bindings.find(b => String(b.id) === String(state.form.binding_id))?.name,
+        interior_color_id: state.dropdowns.interior_colors.find(o => String(o.id) === String(state.form.interior_color_id))?.dbName,
+        paper_type_id: state.dropdowns.paper_types.find(o => String(o.id) === String(state.form.paper_type_id))?.dbName,
+        cover_finish_id: state.dropdowns.cover_finishes.find(o => String(o.id) === String(state.form.cover_finish_id))?.dbName,
+        quantity: qty
+      });
     }
+    if (!calc) {
+      alert("Price calculation not available for selected options.");
+      return;
+    }
+    // Map to existing result shape (include bulk discount like other calculators)
+    const result = {
+      cost_per_book: calc.unitPrice,
+      original_total_cost: calc.totalPrice,
+      total_cost: calc.finalPrice,
+      discount_percent: calc.discountPercent,
+      discount_amount: calc.discountAmount
+    };
+    updateState({ result });
   };
 
   const handleContactExpert = () => {
@@ -500,21 +579,104 @@ fileReader.readAsArrayBuffer(file);
           </div>
         )}
 
-        <OptionField title="Binding Type" name="binding_id" options={state.bindings} imageMap={IMAGE_MAPS.binding} form={state.form} handleChange={handleChange} />
-        <OptionField title="Interior Color" name="interior_color_id" options={interior_colors} imageMap={IMAGE_MAPS.interiorColor} form={state.form} handleChange={handleChange} />
-        <OptionField title="Paper Type" name="paper_type_id" options={paper_types} imageMap={IMAGE_MAPS.paperType} form={state.form} handleChange={handleChange} />
-        <OptionField title="Cover Finish" name="cover_finish_id" options={cover_finishes} imageMap={IMAGE_MAPS.coverFinish} form={state.form} handleChange={handleChange} />
+        {/* Binding Type split into Paperback and Hardcover options */}
+        <fieldset className="mb-6">
+          <legend className="font-semibold text-[#2A428C] mb-4 text-lg">Binding Type</legend>
+          <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#2A428C]">Paperback Options</h4>
+          <div className="flex flex-wrap justify-start items-center gap-2 md:gap-3 lg:gap-4 max-w-3xl mx-auto mb-5 md:mb-6">
+            {state.bindings
+              .filter(opt => ["Coil Bound", "Saddle Stitch", "Perfect Bound"].includes(opt.name))
+              .map(opt => {
+                const hasSize = Boolean(state.form.trim_size_id);
+                const hasPage = Boolean(state.form.page_count);
+                const isAvailable = hasSize && hasPage && state.availableBindings.includes(opt.name);
+                const isSelected = String(state.form.binding_id) === String(opt.id);
+                return (
+                  <label key={opt.id} className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${isSelected ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200" : "border-gray-300 bg-white"} ${!isAvailable ? 'opacity-40 cursor-not-allowed' : ''}`} role="radio" aria-checked={isSelected} aria-disabled={!isAvailable}>
+                    <input type="radio" name="binding_id" value={opt.id} checked={isSelected} onChange={isAvailable ? handleChange : undefined} disabled={!isAvailable} className="sr-only" />
+                    <span className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${isSelected ? 'border-blue-600' : 'border-gray-400'}`}> 
+                      <span className={`block m-[2px] w-2.5 h-2.5 rounded-full ${isSelected ? 'bg-blue-600' : 'bg-transparent'}`}></span>
+                    </span>
+                    {(() => {
+                      const src = IMAGE_MAPS.binding[opt.name];
+                      return src ? <img src={src} alt={opt.name} className="w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain mb-1 md:mb-2" /> : null;
+                    })()}
+                    <span className="text-center text-xs md:text-sm text-gray-700">{opt.name}</span>
+                  </label>
+                );
+              })}
+          </div>
+          <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#2A428C]">Hardcover Options</h4>
+          <div className="flex flex-wrap justify-start items-center gap-2 md:gap-3 lg:gap-4 max-w-3xl mx-auto">
+            {state.bindings
+              .filter(opt => ["Case Wrap", "Linen Wrap"].includes(opt.name))
+              .map(opt => {
+                const hasSize = Boolean(state.form.trim_size_id);
+                const hasPage = Boolean(state.form.page_count);
+                const isAvailable = hasSize && hasPage && state.availableBindings.includes(opt.name);
+                const isSelected = String(state.form.binding_id) === String(opt.id);
+                return (
+                  <label key={opt.id} className={`relative cursor-pointer flex flex-col items-center w-20 md:w-24 lg:w-28 p-2 md:p-2.5 lg:p-3 border rounded-lg transition ${isSelected ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200" : "border-gray-300 bg-white"} ${!isAvailable ? 'opacity-40 cursor-not-allowed' : ''}`} role="radio" aria-checked={isSelected} aria-disabled={!isAvailable}>
+                    <input type="radio" name="binding_id" value={opt.id} checked={isSelected} onChange={isAvailable ? handleChange : undefined} disabled={!isAvailable} className="sr-only" />
+                    <span className={`absolute top-2 left-2 w-4 h-4 rounded-full border-2 ${isSelected ? 'border-blue-600' : 'border-gray-400'}`}> 
+                      <span className={`block m-[2px] w-2.5 h-2.5 rounded-full ${isSelected ? 'bg-blue-600' : 'bg-transparent'}`}></span>
+                    </span>
+                    {(() => {
+                      const src = IMAGE_MAPS.binding[opt.name];
+                      return src ? <img src={src} alt={opt.name} className="w-10 h-10 md:w-14 md:h-14 lg:w-16 lg:h-16 object-contain mb-1 md:mb-2" /> : null;
+                    })()}
+                    <span className="text-center text-xs md:text-sm text-gray-700">{opt.name}</span>
+                  </label>
+                );
+              })}
+          </div>
+        </fieldset>
+        <OptionField title="Interior Color" name="interior_color_id" options={interior_colors} imageMap={IMAGE_MAPS.interiorColor} form={state.form} handleChange={handleChange} stepAccessible={Boolean(state.form.binding_id)} />
+        <OptionField title="Paper Type" name="paper_type_id" options={paper_types} imageMap={IMAGE_MAPS.paperType} form={state.form} handleChange={handleChange} stepAccessible={Boolean(state.form.binding_id && state.form.interior_color_id)} />
+        <OptionField title="Cover Finish" name="cover_finish_id" options={cover_finishes} imageMap={IMAGE_MAPS.coverFinish} form={state.form} handleChange={handleChange} stepAccessible={Boolean(state.form.binding_id && state.form.interior_color_id && state.form.paper_type_id)} />
 
-        <div className="mt-6 md:mt-8">
-          <QuantityEstimateDropdown
-            form={state.form}
-            handleChange={handleChange}
-            handleSubmit={handlePriceCalculation}
-            result={state.result}
-            getDiscountInfo={getDiscountInfo}
-            calculating={state.calculating}
-            loadingAvailableOptions={state.loading}
-          />
+        {/* Inline minimal quantity and calculate (replacing QuantityEstimateDropdown) */}
+        <div className="mt-6 md:mt-8 p-4 bg-blue-50 border border-blue-200 rounded">
+          <div className="flex gap-4 items-end flex-wrap">
+            <div style={{ width: '240px', minWidth: 200 }}>
+              <label className="block font-medium mb-1">Quantity</label>
+              <input type="number" name="quantity" value={state.form.quantity} onChange={handleChange} className="w-full border px-3 py-2 rounded" />
+            </div>
+            <button onClick={handlePriceCalculation} disabled={state.calculating} className="flex-1 bg-[#F8C20A] hover:bg-[#ffd84a] text-[#2A428C] py-2 px-4 rounded font-bold transition min-w-[120px]">
+              {state.calculating ? 'Calculating...' : 'Calculate'}
+            </button>
+          </div>
+          {/* Bulk Discount Table */}
+          <div className="mt-4 p-3 bg-white border border-blue-100 rounded">
+            <h4 className="font-semibold text-[#2A428C] mb-2">Bulk Discount Tiers</h4>
+            <div className="space-y-1 text-sm">
+              {DISCOUNTS.map((tier, idx) => {
+                const min = tier.min;
+                const next = DISCOUNTS[idx + 1]?.min;
+                const label = next ? `${min}-${next - 1}` : `${min}+`;
+                const q = Number(state.form.quantity) || 0;
+                const active = q >= min && (!next || q < next);
+                return (
+                  <div key={min} className={`flex justify-between ${active ? 'font-semibold text-green-700' : 'text-gray-700'}`}>
+                    <span>{label} units:</span>
+                    <span>{tier.percent}% off</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          {state.result && (
+            <div className="mt-4">
+              <p><strong>Cost per Book:</strong> ${Number(state.result.cost_per_book).toFixed(2)}</p>
+              <p><strong>Total (before discount):</strong> ${Number(state.result.original_total_cost ?? state.result.total_cost).toFixed(2)}</p>
+              {state.result.discount_percent > 0 && (
+                <>
+                  <p className="text-green-700"><strong>Bulk Discount:</strong> {state.result.discount_percent}% (-${Number(state.result.discount_amount).toFixed(2)})</p>
+                  <p><strong>Final Total:</strong> ${Number(state.result.total_cost).toFixed(2)}</p>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -548,7 +710,7 @@ fileReader.readAsArrayBuffer(file);
           />
 
           <div className="flex flex-col items-center gap-4 md:gap-6 mt-6 md:mt-10">
-            <button onClick={handleContactExpert} disabled={!!state.coverFile} className="w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg">
+            <button onClick={handleContactExpert} disabled={!!state.coverFile} className={`w-full max-w-md md:max-w-lg lg:max-w-xl px-6 md:px-10 py-2 md:py-3 bg-gradient-to-r from-[#0a79f8] to-[#1e78ee] text-white font-medium text-sm md:text-base rounded-full shadow-md hover:shadow-lg transition ${state.coverFile ? 'opacity-50 cursor-not-allowed' : ''}`}>
               Contact Cover Design Expert
             </button>
 
