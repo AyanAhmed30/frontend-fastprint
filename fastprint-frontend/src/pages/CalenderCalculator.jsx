@@ -467,33 +467,33 @@ const CalendarCalculator = () => {
         </div>
 
         {/* Right Side - Summary */}
-        <div className="w-full xl:w-2/5 bg-white p-4 sm:p-6 lg:p-8 rounded-2xl shadow-lg">
-          <img 
-            src={RightImage} 
-            alt="Custom Calendar Printing" 
-            className="w-full h-32 sm:h-40 lg:h-48 object-cover mb-4 rounded" 
-          />
-          <h2 className="text-lg sm:text-xl font-bold text-[#2A428C] mb-2 text-center">
-            Custom Calendar Printing
-          </h2>
-          <div className="w-full h-0.5 bg-gray-300 mb-4"></div>
-          
-          {/* Summary Information */}
-          {[
-            [['Calendar Size', form.calendarSize || '-'], ['Page Count', `${CONSTANT_PAGE_COUNT} (Fixed)`]],
-            [['Binding Type', form.binding_id || '-'], ['Interior Color', form.interior_color_id || '-']],
-            [['Paper Type', form.paper_type_id || '-'], ['Cover Finish', form.cover_finish_id || '-']],
-            [['Quantity', form.quantity || '-'], ['Status', form.calendarSize && form.binding_id && form.interior_color_id && form.paper_type_id && form.cover_finish_id ? 'Ready to Calculate' : 'Fill Required Fields']]
-          ].map((row, i) => (
-            <React.Fragment key={i}>
-              <SummaryRow pairs={row} />
-              <div className={`w-full h-px bg-gray-200 ${i === 3 ? 'my-4' : 'my-2'}`}></div>
-            </React.Fragment>
-          ))}
-          
-          <div className="flex justify-center mt-6">
-            <div className="w-full max-w-xs">
-              <RedirectButton />
+        <div className="w-full xl:w-2/5">
+          <div className="sticky top-8 bg-white p-4 sm:p-6 lg:p-8 rounded-2xl shadow-lg">
+            <img 
+              src={RightImage} 
+              alt="Custom Calendar Printing" 
+              className="w-full h-32 sm:h-40 lg:h-48 object-cover mb-4 rounded" 
+            />
+            <h2 className="text-lg sm:text-xl font-bold text-[#2A428C] mb-2 text-center">
+              Custom Calendar Printing
+            </h2>
+            <div className="w-full h-0.5 bg-gray-300 mb-4"></div>
+            {/* Summary Information */}
+            {[
+              [['Calendar Size', form.calendarSize || '-'], ['Page Count', `${CONSTANT_PAGE_COUNT} (Fixed)`]],
+              [['Binding Type', form.binding_id || '-'], ['Interior Color', form.interior_color_id || '-']],
+              [['Paper Type', form.paper_type_id || '-'], ['Cover Finish', form.cover_finish_id || '-']],
+              [['Quantity', form.quantity || '-'], ['Status', form.calendarSize && form.binding_id && form.interior_color_id && form.paper_type_id && form.cover_finish_id ? 'Ready to Calculate' : 'Fill Required Fields']]
+            ].map((row, i) => (
+              <React.Fragment key={i}>
+                <SummaryRow pairs={row} />
+                <div className={`w-full h-px bg-gray-200 ${i === 3 ? 'my-4' : 'my-2'}`}></div>
+              </React.Fragment>
+            ))}
+            <div className="flex justify-center mt-6">
+              <div className="w-full max-w-xs">
+                <RedirectButton />
+              </div>
             </div>
           </div>
         </div>
