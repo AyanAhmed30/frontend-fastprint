@@ -5,13 +5,13 @@ import { useState, useEffect } from "react";
 import { BASE_URL } from "../services/baseURL";
 
 // Images
-import Image1 from "../assets/images/startproject1.png";
+import Image1 from "../assets/images/img46.png";
 import Image2 from "../assets/images/startproject2.png";
-import Image3 from "../assets/images/startproject3.png";
-import Image4 from "../assets/images/startproject4.png";
-import Image5 from "../assets/images/startproject5.png";
-import Image6 from "../assets/images/startproject6.png";
-import Image7 from "../assets/images/startproject7.png";
+import Image3 from "../assets/images/img50.png";
+import Image4 from "../assets/images/img51.png";
+import Image5 from "../assets/images/img53.png";
+import Image6 from "../assets/images/img49.png";
+import Image7 from "../assets/images/img48.png";
 
 // ✅ Product Cards
 const productCards = [
