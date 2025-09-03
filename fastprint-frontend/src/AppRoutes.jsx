@@ -9,7 +9,8 @@ import CoverExpert from './pages/CoverExpert';
 import Payment from './pages/Payment';
 import Products from './pages/Products';
 import Services from './pages/Services';
-
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 // Main Pages
 import Home from './pages/Home';
 import Pricing from './pages/Pricing';
@@ -70,6 +71,8 @@ const AppRoutes = () => {
       <Route path="/products" element={<Products />} />
       <Route path="/services" element={<Services />} />
       <Route path="/about" element={<About />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
 
       {/* Auth Pages */}
       <Route path="/login" element={<Login />} />
