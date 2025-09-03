@@ -120,6 +120,7 @@ export default function AccountSettings() {
     country: "",
     city: "",
     postal_code: "",
+    state: "", // <-- Added state field (frontend only)
     address: "",
     account_type: "personal",
   });
@@ -128,6 +129,9 @@ export default function AccountSettings() {
   const [message, setMessage] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
+
+  // Helper for localStorage key
+  const getStateStorageKey = (email) => `account_state_${email || ''}`;
 
   // Animate on mount
   useEffect(() => {
@@ -140,6 +144,10 @@ export default function AccountSettings() {
     setLoading(true);
     try {
       const profile = await apiService.getProfileByEmail(user.email);
+      let stateValue = '';
+      try {
+        stateValue = localStorage.getItem(getStateStorageKey(user.email)) || '';
+      } catch {}
       if (profile) {
         setFormData({
           id: profile.id,
@@ -151,6 +159,7 @@ export default function AccountSettings() {
           country: profile.country || "",
           city: profile.city || "",
           postal_code: profile.postal_code || "",
+          state: stateValue, // restore state from localStorage
           address: profile.address || "",
           account_type: profile.account_type || "personal",
         });
@@ -159,6 +168,7 @@ export default function AccountSettings() {
         setFormData(prev => ({
           ...prev,
           email: user.email,
+          state: stateValue,
         }));
         setIsSaved(false);
       }
@@ -180,6 +190,11 @@ export default function AccountSettings() {
       ...prev,
       [name]: value,
     }));
+    if (name === 'state' && user?.email) {
+      try {
+        localStorage.setItem(getStateStorageKey(user.email), value);
+      } catch {}
+    }
     setIsSaved(false);
   };
 
@@ -195,11 +210,17 @@ export default function AccountSettings() {
     setLoading(true);
     setMessage("");
     try {
-      const { id, password, ...profileData } = formData;
+      const { id, password, state, ...profileData } = formData; // Exclude 'state' from backend
       const dataToSend = {
         ...profileData,
         ...(password && password.trim() && { password })
       };
+      // Save state to localStorage on save as well
+      if (user?.email) {
+        try {
+          localStorage.setItem(getStateStorageKey(user.email), formData.state || '');
+        } catch {}
+      }
       const res = await apiService.saveSettings(dataToSend);
       setMessage(res.message || "Profile saved successfully!");
       setIsSaved(true);
@@ -245,6 +266,7 @@ export default function AccountSettings() {
         country: "",
         city: "",
         postal_code: "",
+        state: "",
         address: "",
         account_type: "personal",
       });
@@ -353,25 +375,62 @@ export default function AccountSettings() {
               <div className="flex-1 h-px bg-gradient-to-r from-[#2A428C]/30 to-transparent"></div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              {[
-                ["country", "Country"],
-                ["city", "City"],
-                ["postal_code", "Postal Code"],
-                ["address", "Residential Address"],
-              ].map(([name, label], index) => (
-                <div key={name} 
-                     className={`${name === 'address' ? 'sm:col-span-2' : ''} transform transition-all duration-300`}
-                     style={{ animationDelay: `${index * 100}ms` }}>
+              {/* Country */}
+              <div className="transform transition-all duration-300">
+                <FloatingLabelInput
+                  name="country"
+                  label="Country"
+                  value={formData.country}
+                  onChange={handleInputChange}
+                  disabled={loading}
+                  placeholder="Enter your country"
+                />
+              </div>
+              {/* City */}
+              <div className="transform transition-all duration-300">
+                <FloatingLabelInput
+                  name="city"
+                  label="City"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  disabled={loading}
+                  placeholder="Enter your city"
+                />
+              </div>
+              {/* Postal Code and State in the same row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 col-span-1 sm:col-span-2">
+                <div className="transform transition-all duration-300">
                   <FloatingLabelInput
-                    name={name}
-                    label={label}
-                    value={formData[name]}
+                    name="postal_code"
+                    label="Postal Code"
+                    value={formData.postal_code}
                     onChange={handleInputChange}
                     disabled={loading}
-                    placeholder={`Enter your ${label.toLowerCase()}`}
+                    placeholder="Enter your postal code"
                   />
                 </div>
-              ))}
+                <div className="transform transition-all duration-300">
+                  <FloatingLabelInput
+                    name="state"
+                    label="State"
+                    value={formData.state}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                    placeholder="Enter your state"
+                  />
+                </div>
+              </div>
+              {/* Address (full width) */}
+              <div className="sm:col-span-2 transform transition-all duration-300">
+                <FloatingLabelInput
+                  name="address"
+                  label="Address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  disabled={loading}
+                  placeholder="Enter your address"
+                />
+              </div>
             </div>
           </div>
 
