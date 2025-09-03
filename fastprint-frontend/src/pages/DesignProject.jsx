@@ -177,7 +177,22 @@ const FileUpload = ({ fileError, selectedFile, uploadStatus, uploadProgress, han
       )}
 
       {uploadStatus === "success" && selectedFile && (
-        <p className="text-green-600 font-semibold text-sm md:text-[16px] text-center truncate w-full px-2">{selectedFile.name} uploaded successfully!</p>
+        <>
+          <p className="text-green-600 font-semibold text-sm md:text-[16px] text-center truncate w-full px-2">{selectedFile.name} uploaded successfully!</p>
+          <div className="w-full flex justify-center mt-4">
+            <button
+              type="button"
+              className="bg-[#2A428C] text-white font-semibold px-6 py-2 rounded-full shadow hover:bg-[#1d326c] transition"
+              onClick={() => {
+                // Reset file upload state to allow re-upload
+                handleFileChange({ target: { files: [] } });
+                document.querySelector('input[type=\"file\"][accept=\"application/pdf\"]').value = "";
+              }}
+            >
+              Replace File
+            </button>
+          </div>
+        </>
       )}
 
       {(uploadStatus === "idle" || uploadStatus === "error") && (
@@ -186,7 +201,23 @@ const FileUpload = ({ fileError, selectedFile, uploadStatus, uploadProgress, han
         </p>
       )}
 
-      {fileError && <p className="text-red-600 text-xs md:text-sm text-center mt-1 md:mt-2 px-2">{fileError}</p>}
+      {fileError && (
+        <>
+          <p className="text-red-600 text-xs md:text-sm text-center mt-1 md:mt-2 px-2">{fileError}</p>
+          <div className="w-full flex justify-center mt-2">
+            <button
+              type="button"
+              className="bg-[#2A428C] text-white font-semibold px-6 py-2 rounded-full shadow hover:bg-[#1d326c] transition"
+              onClick={() => {
+                handleFileChange({ target: { files: [] } });
+                document.querySelector('input[type=\"file\"][accept=\"application/pdf\"]').value = "";
+              }}
+            >
+              Replace File
+            </button>
+          </div>
+        </>
+      )}
     </div>
   </div>
 );
@@ -203,7 +234,23 @@ const CoverDesign = ({ coverFileInputRef, handleCoverFileChange, coverFile }) =>
       </div>
     </div>
     <input type="file" accept="image/jpeg,image/png,application/pdf" ref={coverFileInputRef} onChange={handleCoverFileChange} style={{ display: "none" }} />
-    {coverFile && <p className="text-green-600 text-center mb-4 text-sm md:text-base">Selected cover: {coverFile.name}</p>}
+    {coverFile && (
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-green-600 text-center text-sm md:text-base">Selected cover: {coverFile.name}</p>
+        <button
+          type="button"
+          className="bg-[#2A428C] text-white font-semibold px-4 py-2 rounded-full shadow hover:bg-[#1d326c] transition ml-4"
+          onClick={() => {
+            // Reset cover file state to allow re-upload
+            handleCoverFileChange({ target: { files: [] } });
+            if (coverFileInputRef.current) coverFileInputRef.current.value = "";
+            coverFileInputRef.current?.click();
+          }}
+        >
+          Replace Cover File
+        </button>
+      </div>
+    )}
   </div>
 );
 
@@ -688,6 +735,8 @@ fileReader.readAsArrayBuffer(file);
       <NavBar navigate={navigate} />
       <div className="w-full min-h-screen px-4 md:px-6 py-6 md:py-10 bg-gradient-to-br from-[#eef4ff] to-[#fef6fb] font-sans">
         <div className="max-w-4xl mx-auto p-4 md:p-8 lg:p-12 rounded-xl md:rounded-2xl shadow-xl bg-gradient-to-r from-[#ffe4ec] via-[#fdfdfd] to-[#e0f3ff] flex flex-col gap-6 md:gap-8 lg:gap-10">
+          {state.projectData && <ProjectDetails projectData={state.projectData} />}
+
           <FileUpload 
             fileError={state.fileError}
             selectedFile={state.selectedFile}
@@ -695,8 +744,6 @@ fileReader.readAsArrayBuffer(file);
             uploadProgress={state.uploadProgress}
             handleFileChange={handleFileChange}
           />
-
-          {state.projectData && <ProjectDetails projectData={state.projectData} />}
 
           <div className="flex flex-col gap-3">
             <h2 className="text-[#2A428C] text-lg md:text-xl lg:text-[24px] font-bold">Book Configuration</h2>
