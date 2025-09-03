@@ -229,14 +229,14 @@ const StartProject = () => {
                 {/* Project Title */}
                 <div className="flex flex-col w-full lg:w-1/2">
                   <label className="text-black font-semibold text-sm sm:text-base mb-1 sm:mb-2">
-                    Project Title
+                    Book Title
                   </label>
                   <textarea
                     maxLength={255}
                     rows={2}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Enter project title..."
+                    placeholder="Enter book title..."
                     className="w-full border border-gray-300 rounded-md p-2 sm:p-3 resize-none text-sm sm:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[60px] sm:min-h-[70px]"
                   ></textarea>
                   <div className="text-right text-gray-500 text-xs mt-1">{text.length}/255</div>
